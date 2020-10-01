@@ -29,3 +29,11 @@ export const loading = (msg='加载中...', duration=0) => {
 export const loaded = () => {
     Toast.clear();
 }
+
+export const albumAndSinger = (al, ar) => { // 张学友 / 汤宝如 - 相思风雨中
+    let arArr = [];
+    ar.map((obj) => {
+        arArr.push(obj.name);
+    })
+    return arArr.join(' / ') + ' - ' + al.name;
+}

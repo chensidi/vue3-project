@@ -19,12 +19,37 @@
         <section class="m-recom" v-show="isSearch === true">
             <h3 class="title f-bd f-bd-btm f-thide">搜索“{{ searchVal }}”</h3>
             <ul class="suggest-list">
-                <li v-for="(item) of suggestList" :key="item.keyword">
+                <li @click.stop="chooseHot(item.keyword)" v-for="(item) of suggestList" :key="item.keyword">
                     <van-icon name="search" />
                     <span class="sear-name f-bd f-bd-btm f-thide">{{ item.keyword }}</span>
                 </li>
             </ul>
         </section>
+
+
+        <van-list
+            v-model:loading="loadMoreObj.loading"
+            :finished="loadMoreObj.finished"
+            finished-text="没有更多了"
+            @load="onLoad"
+            v-show="isSearch === null"
+        >
+            <div class="list-item" v-for="(item) of loadMoreObj.songlists" :key="item.id">
+                <div class="f-bd f-bd-btm">
+                    <div class="item-main">
+                        <p class="song-name">
+                            {{ item.name }}
+                        </p>
+                        <p class="song-info">
+                            {{ albumAndSinger(item.al, item.ar) }}
+                        </p>
+                    </div>
+                    <div class="item-icon">
+                        <van-icon name="play-circle-o" />
+                    </div>
+                </div>
+            </div>
+        </van-list>
     </div>
 </template>
 
@@ -32,13 +57,14 @@
     import SearchBar from '@/components/searchBar/searchBar.vue';
     import { reactive, ref } from 'vue';
     import { getHotSearch, getSuggestSearch, getSearchByKw } from '@/api/search.js';
-    import { Icon } from 'vant';
-    import { loading, loaded } from '@/untils/common';
+    import { Icon, List } from 'vant';
+    import { loading, loaded, albumAndSinger } from '@/untils/common';
     export default {
         name: 'Search',
         components: {
             'search-bar': SearchBar,
-            'van-icon': Icon
+            'van-icon': Icon,
+            'van-list': List
         },
         setup() {
 
@@ -46,14 +72,33 @@
             const searchVal = ref('');
             const isSearch = ref(false);
             const suggestList = ref([]);
-            const oldSearch = ref('');
+            let oldSearch = '';
             const searchResult = ref([]);
+            let oldSearchKw = '';
+
+            const loadMoreObj = reactive({ //下拉加载更多列表对象
+                loading: false,
+                finished: false,
+                songlists: []
+            })
 
             function toSearch(val) { //执行搜索
                 searchVal.value = val.trim();
                 if(val.trim() != '') {
                     isSearch.value = null;
-                    getSearchByKws();
+                    // console.log(oldSearch.value, searchVal.value)
+                    if(loadMoreObj.finished) {
+                        loadMoreObj.songlists = [];
+                        loadMoreObj.finished = false;
+                    }else {
+                        if(oldSearchKw != searchVal.value) { //更新了搜索字段
+                            loadMoreObj.songlists = [];
+                            loadMoreObj.finished = false;
+                            getSearchByKws();
+                        }else {
+                            getSearchByKws();
+                        }
+                    }
                 }
             }
 
@@ -73,8 +118,16 @@
 
             function chooseHot(sear) { //点击选择热门搜索
                 searchVal.value = sear;
+                console.log(searchVal.value);
                 isSearch.value = null;
-                getSearchByKws();
+                if(loadMoreObj.finished) {
+                    loadMoreObj.songlists = [];
+                    loadMoreObj.finished = false;
+                }else {
+                    loadMoreObj.songlists = [];
+                    loadMoreObj.finished = false;
+                    getSearchByKws();
+                }
             }
 
             function onInputChanges(val) { //输入框变化
@@ -91,7 +144,7 @@
                 // console.log(searchVal.value);
                 if(searchVal.value != '') {
                     isSearch.value = true;
-                    if(oldSearch.value !== searchVal.value) {
+                    if(oldSearch !== searchVal.value) {
                         getSuggestSearches(searchVal.value);
                     }
                 }else {
@@ -106,14 +159,28 @@
                 loaded();
                 if(res.allMatch) {
                     suggestList.value = res.allMatch;
-                    oldSearch.value = searchVal.value; //搜索后记录上次值
+                    oldSearch = searchVal.value; //搜索后记录上次值
                 }
             }
 
             async function getSearchByKws() { //根据关键字搜索的结果
-                let len = searchResult.value.length;
-                let res = await getSearchByKw(searchVal.value, 20, len);
-                console.log(res);
+                oldSearchKw = searchVal.value;
+                let len = loadMoreObj.songlists.length;
+                let res = await getSearchByKw(searchVal.value, 30, len);
+                // console.log(res);
+                loadMoreObj.loading = false;
+                let { songs=[] } = res;
+                if(songs.length > 0) {
+                    loadMoreObj.songlists = loadMoreObj.songlists.concat(songs);
+                    console.log(loadMoreObj.songlists);
+                }else {
+                    loadMoreObj.finished = true;
+                }
+            }
+
+
+            function onLoad() { //when加载
+                getSearchByKws();
             }
 
             getHotSearchs();
@@ -130,6 +197,9 @@
                 onInputChanges,
                 onFocus,
                 suggestList,
+                loadMoreObj,
+                onLoad,
+                albumAndSinger,
             }
         }
     }
@@ -246,5 +316,30 @@
         flex: 1;
         line-height: 45px;
         @include elp;
+    }
+
+    .list-item{
+        padding-left: 10px;
+        color: #333;
+        .item-main{
+            padding: 6px 0;
+            flex: 1;
+            overflow: hidden;
+        }
+        .item-icon{
+            padding: 0 10px;
+        }
+        .song-name{
+            font-size: 17px;
+            @include elp;
+        }
+        .song-info{
+            font-size: 12px;
+            color: #888;
+            @include elp;
+        }
+        >div{
+            @include flex;
+        }
     }
 </style>

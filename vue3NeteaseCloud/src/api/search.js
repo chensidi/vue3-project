@@ -32,3 +32,14 @@ export const getSearchByKw = async (kw, limit=20, offset) => { //通过关键字
         return Promise.reject(res.status);
     }
 }
+
+export const getSongUrl = async (id) => { //获取music url
+    let res = await httpGet(`/song/url?id=${id}`).catch(err => {
+        return Promise.reject(err);
+    })
+    if(res.status === 200){
+        return res.data.data[0];
+    }else{
+        return Promise.reject(res.status);
+    }
+}

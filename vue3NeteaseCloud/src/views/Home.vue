@@ -21,7 +21,7 @@
     import ModSection from '@/components/home/modSection.vue';
     import ModMv from '@/components/home/modMv.vue';
     import Footer from '@/components/footer/footer';
-    import { loading, loaded } from '@/untils/common.js';
+    import { loading, loaded } from '@/tools/common.js';
     import { Icon, Toast } from 'vant';
     import { getRecommend, getTopPlay, getNewMv } from '@/api/home.js';
     import { ref, 

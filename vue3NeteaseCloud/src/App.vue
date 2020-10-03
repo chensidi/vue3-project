@@ -7,26 +7,24 @@
                 <component :is="Component" />
             </keep-alive>
         </router-view>
+        <PlayBar />
     </div>
 </template>
 
 <script>
     import Header from '@/components/header/header.vue'
     import SwitchPannel from '@/components/switchPannel/switchPannel.vue'
-    import { onBeforeRouteUpdate } from 'vue-router'
+    import PlayBar from '@/components/playBar/playBar.vue'
 
     export default {
         name: 'App',
         components: {
             Header,
-            SwitchPannel
+            SwitchPannel,
+            PlayBar
         },
         setup() {
             const keepViews = ['Home', 'Sort'];
-
-            onBeforeRouteUpdate((to, from, next) => {
-                console.log(666)
-            })
 
             return {
                 keepViews
@@ -36,22 +34,5 @@
 </script>
 
 <style lang="scss">
-    * {
-        padding: 0;
-        margin: 0;
-        box-sizing: border-box;
-        list-style-type: none;
-    }
-    #app{
-        background-color: #fafafa;
-        min-height: 100vh;
-    }
-    .box-wrap{
-        position: absolute;
-        top: 4.7rem;
-        bottom: 0;
-        width: 100vw;
-        left: 0;
-        overflow: auto;
-    }
+    @import '@/assets/style.scss';
 </style>

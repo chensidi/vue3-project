@@ -3,7 +3,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
-import '@/untils/rem.js'
+import '@/tools/rem.js'
 // import Vant from 'vant';
 // import 'vant/lib/index.css';
 import fastClick from 'fastclick';

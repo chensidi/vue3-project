@@ -25,7 +25,7 @@
     import { onBeforeRouteLeave } from 'vue-router';
     import SortPannel from '@/components/sort/sortPannel.vue';
     import TrackPannel from '@/components/sort/trackPannel.vue';
-    import { loading, loaded } from '@/untils/common.js';
+    import { loading, loaded } from '@/tools/common.js';
     export default {
         name: 'Sort',
         components: {
@@ -93,6 +93,7 @@
 </script>
 
 <style lang="scss" scoped>
+    @import '@/assets/style.scss';
     .sort-wrap{
         padding: 20px 15px;
     }

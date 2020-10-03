@@ -16,7 +16,7 @@
 
 <script>
 import { Icon } from "vant";
-import { numFormat } from '@/untils/common.js';
+import { numFormat } from '@/tools/common.js';
 
 export default {
   name: "ModSection",

@@ -34,7 +34,7 @@
             @load="onLoad"
             v-show="isSearch === null"
         >
-            <div class="list-item" v-for="(item) of loadMoreObj.songlists" :key="item.id">
+            <div @click.stop="toPlay(item)" class="list-item" v-for="(item) of loadMoreObj.songlists" :key="item.id">
                 <div class="f-bd f-bd-btm">
                     <div class="item-main">
                         <p class="song-name">
@@ -56,9 +56,10 @@
 <script>
     import SearchBar from '@/components/searchBar/searchBar.vue';
     import { reactive, ref } from 'vue';
-    import { getHotSearch, getSuggestSearch, getSearchByKw } from '@/api/search.js';
+    import { useStore } from 'vuex';
+    import { getHotSearch, getSuggestSearch, getSearchByKw, getSongUrl } from '@/api/search.js';
     import { Icon, List } from 'vant';
-    import { loading, loaded, albumAndSinger } from '@/untils/common';
+    import { loading, loaded, albumAndSinger } from '@/tools/common';
     export default {
         name: 'Search',
         components: {
@@ -75,6 +76,7 @@
             let oldSearch = '';
             const searchResult = ref([]);
             let oldSearchKw = '';
+            const store = useStore();
 
             const loadMoreObj = reactive({ //下拉加载更多列表对象
                 loading: false,
@@ -172,7 +174,7 @@
                 let { songs=[] } = res;
                 if(songs.length > 0) {
                     loadMoreObj.songlists = loadMoreObj.songlists.concat(songs);
-                    console.log(loadMoreObj.songlists);
+                    // console.log(loadMoreObj.songlists);
                 }else {
                     loadMoreObj.finished = true;
                 }
@@ -183,9 +185,23 @@
                 getSearchByKws();
             }
 
+            async function toPlay(item) { //点击播放
+                // console.log(item);
+                loading('歌曲下载中...');
+                let res = await getSongUrl(item.id); //下载歌曲
+                // console.log(res);
+                store.dispatch('setAudioInfo', { //更新store
+                    url: res.url,
+                    singer: item.ar[0].name,
+                    song: item.name,
+                    poster: item.al.picUrl
+                }).then(() => {
+                    setTimeout(() => {loaded()}, 500)
+                })
+            }
+
             getHotSearchs();
 
-            
 
             return {
                 toSearch,
@@ -200,6 +216,7 @@
                 loadMoreObj,
                 onLoad,
                 albumAndSinger,
+                toPlay,
             }
         }
     }

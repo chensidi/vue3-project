@@ -194,7 +194,8 @@
                     url: res.url,
                     singer: item.ar[0].name,
                     song: item.name,
-                    poster: item.al.picUrl
+                    poster: item.al.picUrl,
+                    id: item.id
                 }).then(() => {
                     setTimeout(() => {loaded()}, 500)
                 })

@@ -43,3 +43,14 @@ export const getSongUrl = async (id) => { //获取music url
         return Promise.reject(res.status);
     }
 }
+
+export const getLrc = async (id) => { //获取music lrc
+    let res = await httpGet(`/lyric?id=${id}`).catch(err => {
+        return Promise.reject(err);
+    })
+    if(res.status === 200){
+        return res.data.lrc;
+    }else{
+        return Promise.reject(res.status);
+    }
+}

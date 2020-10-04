@@ -9,6 +9,11 @@ import '@/tools/rem.js'
 import fastClick from 'fastclick';
 fastClick.attach(document.body);
 
+import VConsole from 'vconsole';
+if(process.env.NODE_ENV !== 'production') {
+    new VConsole();
+}
+
 router.afterEach((to, from) => {
     document.title = to.meta.title;
 })

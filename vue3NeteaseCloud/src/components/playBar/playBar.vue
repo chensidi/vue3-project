@@ -2,14 +2,14 @@
     <div class="play-bar" v-if="getAudioInfo.url">
         <div class="play-bottom" @click="alertPlayBox">
             <div class="pl-lf">
-                <img class="play-poster" :src="getAudioInfo.poster" alt="">
+                <img class="play-poster" :src="getAudioInfo.poster" alt="" :style="{'transform': 'rotate('+ angle +'deg)'}" />
                 <div class="play-info">
                     <h4>{{ getAudioInfo.song }}</h4>
                     <p>{{ getAudioInfo.singer }}</p>
                 </div>
             </div>
             <div class="play-cpn">
-                <van-icon @click.stop="playAndPause" size="30px" color="#333" :name="!playing?'play-circle-o':'pause-circle-o'" />
+                <van-icon @click.stop="playAndPause" style="display: block;" size="30px" color="#333" :name="!playing?'play-circle-o':'pause-circle-o'" />
             </div>
         </div>
         <audio 
@@ -29,7 +29,7 @@
                 <div class="m-song-disc">
                     <div class="m-song-turn" @click.stop="playAndPause"></div>
                     <div class="m-song-img">
-                        <img :src="getAudioInfo.poster" alt="">
+                        <img :src="getAudioInfo.poster" alt="" :style="{'transform': 'rotate('+ angle +'deg)'}" />
                     </div>
                     <div class="m-song-plybtn" @click.stop="playAndPause" v-show="!playing"></div>
                 </div>
@@ -48,13 +48,20 @@
                     </div>
                 </div>
             </div>
+            <div class="option-area">
+                <div class="time-bar">
+                    <time>{{ timeFormat(start) }}</time>
+                    <van-slider v-model="progress" @change="onProgressChange" />
+                    <time>{{ timeFormat(end) }}</time>
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
-    import { Icon, Loading } from 'vant';
-    import { ref, reactive, watch, computed, nextTick } from 'vue';
+    import { Icon, Slider, } from 'vant';
+    import { ref, reactive, watch, computed, nextTick, toRefs, } from 'vue';
     import { useStore } from 'vuex';
     import { getLrc } from '@/api/search.js';
     import { loading, loaded } from '@/tools/common.js';
@@ -62,28 +69,47 @@
     export default {
         name: 'PlayBar',
         components: {
-            'van-icon': Icon
+            'van-icon': Icon,
+            'van-slider': Slider,
         },
         setup(props, ctx) {
             const store = useStore();
             const audio = ref(null); //音频ref
             const playing = ref(false);
-            // let audioObj = reactive(store.getters.getAudioInfo);
-            // console.log(store.getters.getAudioInfo)
+           
             const show = ref(false);
             const showPlayWarp = ref(false);
             let lrc = '';
             const lrcArr = ref([]);
             const top = ref(0);
             const on = ref(0);
-            // if(audioObj.url) {
-            //     show.value = true;
-            // }
+            const progress = ref(0); //进度条
+            const timeStamp = reactive({ //时长相关参数
+                start: 0,
+                end: 0,
+                angle: 0
+            })
+            let timer = null; //旋转计时器
+
+            function openTimer() {
+                let audioDom = audio.value;
+                if(audioDom.paused) {
+                    clearTimeout(timer);
+                    timer = null;
+                }else {
+                    timer = setTimeout(() => {
+                        timeStamp.angle += .25;
+                        openTimer();
+                    }, 20)
+                }
+            }
+            
             function playAndPause() { //播放&暂停
                 let audioDom = audio.value;
                 if(audioDom.paused) {
                     audioDom.play();
                     playing.value = true;
+                    openTimer();
                 }else {
                     audioDom.pause();
                     playing.value = false;
@@ -97,6 +123,9 @@
             }
 
             async function alertPlayBox() { //点击底部弹出播放主页面
+                let audioDom = audio.value,
+                    duration = Math.round(audioDom.duration); //时长
+                timeStamp.end = duration;
                 if(lrc == '') { //没有歌词
                     loading('歌词加载中...');
                     let res = await getLrc(getAudioInfo.value.id);
@@ -128,7 +157,11 @@
 
             function onTimeUpdate() { //播放中时间更新
                 let audioDom = audio.value !== null ? audio.value : document.getElementById('audio');
-                let curTime = Math.round(audioDom.currentTime);
+                let curTime = Math.round(audioDom.currentTime); //当前毫秒叔
+                let duration = Math.round(audioDom.duration); //时长
+                progress.value = Math.round(curTime / duration * 100); //当前进度
+                timeStamp.start = curTime;
+                timeStamp.end = duration;
                 if(lrcArr.value.length > 0) {
                     for(let i = 0; i < lrcArr.value.length; i ++) {
                         if(lrcArr.value[i].time == curTime) {
@@ -141,6 +174,26 @@
                         }
                     }
                 }
+            }
+
+            function onProgressChange(val) { //进度条改变
+                // console.log(val);
+                let audioDom = audio.value,
+                    duration = audioDom.duration, //时长
+                    cur = duration * val / 100; //改变后的当前进度
+                
+                timeStamp.start = Math.round(cur);
+                audioDom.currentTime = cur;
+            }
+
+            function timeFormat(timeStamp) { //320ms ==> 05:20
+                let min = parseInt(timeStamp / 60),
+                    sec = timeStamp % 60;
+                
+                min = min.toString().padStart(2, '0');
+                sec = sec.toString().padStart(2, '0');
+
+                return min + ':' + sec;
             }
 
 
@@ -156,7 +209,13 @@
                         audioDom.oncanplay = function() {
                             audioDom.play();
                             playing.value = true;
+                            openTimer();
                         }
+
+                        //时长相关初始化
+                        timeStamp.start = 0;
+                        timeStamp.end = audioDom.duration;
+                        timeStamp.angle = 0;
                     }, 0)
                 })
             })
@@ -175,6 +234,10 @@
                 onTimeUpdate,
                 top,
                 on,
+                onProgressChange,
+                progress,
+                ...toRefs(timeStamp),
+                timeFormat,
             }
         }
     }
@@ -222,6 +285,7 @@
     .pl-lf{
         @include flex(center, flex-start);
         flex: 1;
+        overflow: hidden;
     }
     .play-pannel{
         position: fixed;
@@ -231,11 +295,11 @@
         width: 100vw;
         z-index: 999;
         background: #fff;
-        transform: translate3d(0, 100%, 0);
+        transform: translate3d(0, 102%, 0);
         transition: all .3s;
     }
     .show-pannel{
-        transform: translate3d(0, 0, 0);
+        transform: translate3d(0, -2%, 0);
     }
     .play-bg{
         position: absolute;
@@ -252,7 +316,7 @@
         overflow: hidden;
         transition: opacity .3s linear;
         opacity: 1;
-        filter: blur(1.5px);
+        filter: blur(2.5px);
         &::before{
             content: " ";
             position: absolute;
@@ -296,6 +360,8 @@
         margin: -92px 0 0 -92px;
         >img{
             width: 100%;
+            border-radius: 50%;
+            transition: all .1s;
         }
     }
 
@@ -361,5 +427,36 @@
         top: 18px;
         left: 12px;
         color: #fff;
+    }
+    .option-area{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        padding: 10px;
+        // height: 50px;
+        /deep/ .van-slider__button{
+            width: 6px;
+            height: 6px;
+            transform: scaleY(2);
+        }
+        /deep/ .van-slider{
+            height: 1px;
+            transform: scaleY(.5);
+            width: 82%;
+            margin: auto;
+            background-color: #aaa;
+        }
+        /deep/ .van-slider__bar{
+            background-color: #fff;
+        }
+        .time-bar{
+            @include flex();
+            time{
+                color: #fff;
+                font-size: 10px;
+                transform: scale(0.8);
+            }
+        }
     }
 </style>

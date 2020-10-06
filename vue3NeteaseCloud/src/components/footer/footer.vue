@@ -15,24 +15,5 @@
 </script>
 
 <style lang="scss" scoped>
-    @mixin flex-b{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .copyright {
-        margin-top: 1.5rem;
-        padding: .8rem 0;
-        text-align: center;
-        font-size: 12px;
-        color: rgba(26,26,26,1);
-    }
-    .copyright__media {
-        width: 4rem;
-        height: 1.1rem;
-        margin: 0 auto .5rem;
-        img{
-            width: 100%;
-        }
-    }
+    @import './footer.scss';
 </style>

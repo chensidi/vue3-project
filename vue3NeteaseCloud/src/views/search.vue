@@ -55,7 +55,7 @@
 
 <script>
     import SearchBar from '@/components/searchBar/searchBar.vue';
-    import { reactive, ref } from 'vue';
+    import { reactive, ref, computed, } from 'vue';
     import { useStore } from 'vuex';
     import { getHotSearch, getSuggestSearch, getSearchByKw, getSongUrl } from '@/api/search.js';
     import { Icon, List } from 'vant';
@@ -185,6 +185,8 @@
                 getSearchByKws();
             }
 
+            let getAudioHistory = computed(() => store.getters.getAudioHistory); //播放记录
+
             async function toPlay(item) { //点击播放
                 // console.log(item);
                 loading('歌曲下载中...');
@@ -199,6 +201,21 @@
                 }).then(() => {
                     setTimeout(() => {loaded()}, 500)
                 })
+
+                let tempHistory;
+                if(getAudioHistory.value.length === undefined) { //没有记录
+                    tempHistory = [];
+                }else {
+                    tempHistory = getAudioHistory.value;
+                }
+                tempHistory.push({
+                    url: res.url,
+                    singer: item.ar[0].name,
+                    song: item.name,
+                    poster: item.al.picUrl,
+                    id: item.id
+                })
+                store.dispatch('setAudioHistory', tempHistory); //更新播放记录
             }
 
             getHotSearchs();

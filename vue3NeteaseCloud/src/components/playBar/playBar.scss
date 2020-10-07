@@ -225,3 +225,46 @@
         transform: rotate(180deg);
     }
 }
+
+.history-wrap{
+    padding: 10px;
+    font-size: 14px;
+    .pop-title{
+        text-align: center;
+        line-height: 2;
+        font-size: 16px;
+        margin-bottom: 10px;
+        // font-weight: normal;
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff;
+        z-index: 111;
+        width: 100%;
+    }
+    em{
+        font-style: normal;
+        font-size: 12px;
+        color: #999;
+    }
+    span{
+        @include elp;
+    }
+    p{
+        @include flex();
+        line-height: 2.5;
+        &.active{
+            em, span{
+                color: #dd001b;
+            }
+        }
+    }
+    .history-items{
+        position: absolute;
+        overflow-y: auto;
+        width: 94%;
+        top: 40px;
+        bottom: 0;
+    }
+}

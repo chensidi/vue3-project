@@ -55,6 +55,7 @@
                     <time>{{ timeFormat(end) }}</time>
                 </div>
                 <div class="option-bar">
+                    <van-icon name="setting" />
                     <span class="rot">
                         <van-icon name="play" @click.stop="cutSong(false)" />
                     </span>
@@ -62,14 +63,37 @@
                     <span>
                         <van-icon name="play" @click.stop="cutSong(true)" />
                     </span>
+                    <van-icon name="bars" @click.stop="showPop = true" />
                 </div>
             </div>
         </div>
+        <van-popup 
+            v-model:show="showPop"
+            position="bottom"
+            round
+            :style="{ height: '50%' }"
+        >
+            <div class="history-wrap">
+                <h4 class="pop-title">历史记录</h4>
+                <div class="history-items">
+                    <p @click.stop="toPlay(item)" v-for="(item, i) of getAudioHistory" :key="item.id" :class="{'active': songIdx == i}">
+                        <span>
+                            <van-icon style="vertical-align: middle;" name="volume-o" />
+                                {{ item.song }} - 
+                            <em>
+                                {{ item.singer }}
+                            </em>
+                        </span>
+                        <van-icon name="cross" />
+                    </p>
+                </div>
+            </div>
+        </van-popup>
     </div>
 </template>
 
 <script>
-    import { Icon, Slider, } from 'vant';
+    import { Icon, Slider,Popup, } from 'vant';
     import { ref, reactive, watch, computed, nextTick, toRefs, } from 'vue';
     import { useStore } from 'vuex';
     import { getLrc, getSongUrl } from '@/api/search.js';
@@ -80,6 +104,7 @@
         components: {
             'van-icon': Icon,
             'van-slider': Slider,
+            'van-popup': Popup, 
         },
         setup(props, ctx) {
             const store = useStore();
@@ -99,7 +124,8 @@
                 angle: 0
             })
             let timer = null; //旋转计时器
-            let songIdx = 0; //歌曲历史记录下标
+            const songIdx = ref(0); //歌曲历史记录下标
+            const showPop = ref(false); //歌曲历史底部弹窗
 
             function openTimer() {
                 let audioDom = audio.value;
@@ -168,6 +194,27 @@
                 return split2;
             }
 
+            function changeTopValue(curTime) { //比较歌词时间点改变顶部距离
+                if(lrcArr.value.length > 0) {
+                    for(let i = 0; i < lrcArr.value.length; i ++) {
+                        if(i < lrcArr.value.length - 1){
+                            if(lrcArr.value[i].time <= curTime && lrcArr.value[i + 1].time > curTime) {
+                                on.value = i;
+                                if(i > 1 && i < lrcArr.value.length - 2) {
+                                    let idx = (i - 2) * 2;
+                                    top.value = idx;
+                                    break;
+                                }
+                            }
+                        }else {
+                            if(lrcArr.value[i].time <= curTime) {
+                                on.value = i;
+                            }
+                        }
+                    }
+                }
+            }
+
             function onTimeUpdate() { //播放中时间更新
                 let audioDom = audio.value !== null ? audio.value : document.getElementById('audio');
                 let curTime = Math.round(audioDom.currentTime); //当前毫秒叔
@@ -175,18 +222,7 @@
                 progress.value = Math.round(curTime / duration * 100); //当前进度
                 timeStamp.start = curTime;
                 timeStamp.end = duration;
-                if(lrcArr.value.length > 0) {
-                    for(let i = 0; i < lrcArr.value.length; i ++) {
-                        if(lrcArr.value[i].time == curTime) {
-                            on.value = i;
-                            if(i > 1 && i < lrcArr.value.length - 2) {
-                                let idx = (i - 2) * 2;
-                                top.value = idx;
-                                break;
-                            }
-                        }
-                    }
-                }
+                changeTopValue(timeStamp.start);
             }
 
             function onProgressChange(val) { //进度条改变
@@ -197,6 +233,7 @@
                 
                 timeStamp.start = Math.round(cur);
                 audioDom.currentTime = cur;
+                changeTopValue(timeStamp.start);
             }
 
             function timeFormat(timeStamp) { //320ms ==> 05:20
@@ -220,26 +257,24 @@
             }
 
             async function cutSong(flag=true) { //切歌
-                songIdx = computedSongIdx();
+                songIdx.value = computedSongIdx();
                 if(flag) { //下一首
-                    if(songIdx >= getAudioHistory.value.length - 1) { //已经是最后一首
-                        songIdx = 0; //归零
+                    if(songIdx.value >= getAudioHistory.value.length - 1) { //已经是最后一首
+                        songIdx.value = 0; //归零
                     }else {
-                        songIdx ++;
+                        songIdx.value ++;
                     }
                 }else { //上一首
-                    if(songIdx <= 0) { //已经是第一首
-                        songIdx = getAudioHistory.value.length - 1; //退到最后一首
+                    if(songIdx.value <= 0) { //已经是第一首
+                        songIdx.value = getAudioHistory.value.length - 1; //退到最后一首
                     }else {
-                        songIdx --;
+                        songIdx.value --;
                     } 
                 }
-                // console.log(songIdx);
 
-                let item = getAudioHistory.value[songIdx]; //当前歌曲对象
+                let item = getAudioHistory.value[songIdx.value]; //当前歌曲对象
                 loading('歌曲下载中...');
                 let res = await getSongUrl(item.id); //下载歌曲
-                // console.log(res);
                 store.dispatch('setAudioInfo', { //更新store
                     url: res.url,
                     singer: item.singer,
@@ -255,11 +290,28 @@
                 
             }
 
+            async function toPlay(item) { //点击播放
+                loading('歌曲下载中...');
+                let res = await getSongUrl(item.id); //下载歌曲
+                store.dispatch('setAudioInfo', { //更新store
+                    url: res.url,
+                    singer: item.singer,
+                    song: item.song,
+                    poster: item.poster,
+                    id: item.id
+                }).then(async () => {
+                    setTimeout(() => {loaded()}, 500);
+                    res = await getLrc(getAudioInfo.value.id);
+                    lrc = res.lyric;
+                    lrcArr.value = formatLrc(lrc);
+                })
+                songIdx.value = computedSongIdx();
+            }
+
 
             let getAudioInfo = computed(() => store.getters.getAudioInfo);
 
             let getAudioHistory = computed(() => store.getters.getAudioHistory);
-            console.log(getAudioHistory.value);
 
             watch(getAudioInfo, (now) => {
                 lrc = ''; //检测到变化歌词清空
@@ -283,9 +335,9 @@
             })
 
             watch(getAudioHistory, (now) => {
-                // console.log(now);
-                songIdx = computedSongIdx();
+                songIdx.value = computedSongIdx();
             })
+
 
             return {
                 audio,
@@ -306,6 +358,10 @@
                 ...toRefs(timeStamp),
                 timeFormat,
                 cutSong,
+                showPop,
+                getAudioHistory,
+                toPlay,
+                songIdx,
             }
         }
     }

@@ -55,7 +55,7 @@
                     <time>{{ timeFormat(end) }}</time>
                 </div>
                 <div class="option-bar">
-                    <van-icon name="setting" />
+                    <van-icon name="bars" @click.stop="showPop = true" />
                     <span class="rot">
                         <van-icon name="play" @click.stop="cutSong(false)" />
                     </span>
@@ -63,7 +63,10 @@
                     <span>
                         <van-icon name="play" @click.stop="cutSong(true)" />
                     </span>
-                    <van-icon name="bars" @click.stop="showPop = true" />
+                    <span class="voice-ctrl">
+                        <van-slider v-show="voice.show" v-model="voice.val" vertical @change="onVoiceChange" />
+                        <van-icon name="volume" @click.stop="voice.show = !voice.show" />
+                    </span>
                 </div>
             </div>
         </div>
@@ -126,6 +129,10 @@
             let timer = null; //旋转计时器
             const songIdx = ref(0); //歌曲历史记录下标
             const showPop = ref(false); //歌曲历史底部弹窗
+            const voice = reactive({
+                val: 50,
+                show: false
+            }); //音量
 
             function openTimer() {
                 let audioDom = audio.value;
@@ -308,6 +315,11 @@
                 songIdx.value = computedSongIdx();
             }
 
+            function onVoiceChange(val) {
+                let audioDom = audio.value;
+                audioDom.volume = (100 - val) / 100;
+            }
+
 
             let getAudioInfo = computed(() => store.getters.getAudioInfo);
 
@@ -362,6 +374,8 @@
                 getAudioHistory,
                 toPlay,
                 songIdx,
+                onVoiceChange,
+                voice,
             }
         }
     }

@@ -15,6 +15,7 @@
     import Header from '@/components/header/header.vue'
     import SwitchPannel from '@/components/switchPannel/switchPannel.vue'
     import PlayBar from '@/components/playBar/playBar.vue'
+    import { login } from '@/api/home.js';
 
     export default {
         name: 'App',
@@ -25,7 +26,7 @@
         },
         setup() {
             const keepViews = ['Home', 'Sort'];
-
+            login();
             return {
                 keepViews
             }

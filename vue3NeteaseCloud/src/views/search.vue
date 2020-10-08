@@ -49,6 +49,9 @@
                     </div>
                 </div>
             </div>
+            <div class="no-data-yet" v-show="loadMoreObj.songlists.length == 0">
+                <van-loading type="spinner" />
+            </div>
         </van-list>
     </div>
 </template>
@@ -58,14 +61,15 @@
     import { reactive, ref, computed, } from 'vue';
     import { useStore } from 'vuex';
     import { getHotSearch, getSuggestSearch, getSearchByKw, getSongUrl } from '@/api/search.js';
-    import { Icon, List } from 'vant';
+    import { Icon, List, Loading, } from 'vant';
     import { loading, loaded, albumAndSinger } from '@/tools/common';
     export default {
         name: 'Search',
         components: {
             'search-bar': SearchBar,
             'van-icon': Icon,
-            'van-list': List
+            'van-list': List,
+            'van-loading': Loading, 
         },
         setup() {
 
@@ -384,5 +388,11 @@
         >div{
             @include flex;
         }
+    }
+
+    .no-data-yet{
+        text-align: center;
+        position: relative;
+        top: 200px;
     }
 </style>

@@ -3,7 +3,7 @@
         <router-link to="/">
             推荐
         </router-link>
-        <router-link to="/about">
+        <router-link to="/singer">
             歌手
         </router-link>
         <router-link to="/sort">

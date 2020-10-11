@@ -29,6 +29,7 @@
 	import { IndexBar, IndexAnchor, Cell, List, } from 'vant';
 	import { ref, reactive, toRefs, onMounted, watch, nextTick } from 'vue';
 	import { getSingerList } from '@/api/singer.js';
+	import { lazyLoadImg } from '@/tools/common.js';
 	
 	export default {
 		name: 'Singer',
@@ -64,7 +65,7 @@
 					let singerHeads = document.getElementsByClassName('singer-head');
 					singerHeads = Array.from(singerHeads).slice(num*10, num*10 + 10);
 					singerHeads.forEach(item => {
-						lazyLoad(item, {
+						lazyLoadImg(item, {
 							root: document.getElementsByClassName('box-wrap')[0],
 							threshold: 0,
 							rootMargin: '0px 0px 0px 0px'
@@ -74,28 +75,6 @@
 				})
 			}
 
-
-			function createList() {
-				for(let i = 65; i < 91; i ++) {
-					let item = String.fromCharCode(i);
-					singerObj.list.push(item);
-					// getSingerList(-1, -1, item).then((res) => {
-					// 	singerObj.singerList[i-65] = res;
-					// })
-					// computedLazy();
-				}
-				// getSingerList(-1, -1, 'A').then((res) => {
-				// 	singerObj.singerList[0] = res;
-				// })
-			}
-
-			function onSelect(val) {
-				console.log(val);
-			}
-
-			function onScrll() { //滚动监听
-				document.getElementsByClassName('box-wrap')[0].addEventListener('scroll', debounce(computedLazy, 500)) 
-			}
 
 			function debounce(func, wait) {
 				let timeout;
@@ -111,65 +90,8 @@
 				}
 			}
 
-			function computedLazy() { //计算懒加载
-				let oImgs = document.getElementsByClassName('singer-head');
-				// console.log(oImgs);
-				for(let i = num; i < oImgs.length; i ++) {
-					let oTop = oImgs[i].offsetTop,
-						oScroll = document.getElementsByClassName('box-wrap')[0].scrollTop;
-
-					if(oTop < oScroll + height + barH) {
-						let src = oImgs[i].getAttribute('data-src');
-						oImgs[i].setAttribute('src', src);
-						oImgs[i].removeAttribute('data-src');
-						num = i;
-					}else {
-						break;
-					}
-				}
-			}
-
-			function lazyLoad(target, options) {
-				let io = new IntersectionObserver((entries, observer) => {
-					entries.forEach(entry => {
-						if(entry.isIntersecting) {
-							let src = entry.target.getAttribute('data-src');
-							if(src) {
-								entry.target.setAttribute('src', src);
-								entry.target.removeAttribute('data-src');
-								observer.disconnect();
-							}
-						}
-					})
-				}, options)
-				io.observe(target);
-			}	
-
-			// createList();
-
-			onMounted(() => {
-				// onScrll();
-				// height = document.getElementsByClassName('box-wrap')[0].offsetHeight;
-				// barH = document.getElementsByClassName('play-bar')[0].offsetHeight;
-			})
-
-			// watch(singerObj.singerList, (now) => {
-			// 	if(now.length == singerObj.list.length) {
-			// 		let singerHeads = document.getElementsByClassName('singer-head');
-			// 		singerHeads = Array.from(singerHeads);
-			// 		singerHeads.forEach(item => {
-			// 			lazyLoad(item, {
-			// 				root: document.getElementsByClassName('box-wrap')[0],
-			// 				threshold: 0,
-			// 				rootMargin: '0px 0px 0px 0px'
-			// 			})
-			// 		})
-			// 	}
-			// })
-
 			return {
 				...toRefs(singerObj),
-				onSelect,
 				...toRefs(loadObj),
 				onLoad,
 			}

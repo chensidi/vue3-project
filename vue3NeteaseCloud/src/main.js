@@ -16,6 +16,7 @@ if(process.env.NODE_ENV !== 'production') {
 
 router.afterEach((to, from) => {
     document.title = to.meta.title;
+    store.dispatch('setNumber', Math.random());
 })
 
 createApp(App).use(router).use(store).mount('#app')

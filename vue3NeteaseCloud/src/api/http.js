@@ -12,7 +12,6 @@ export const httpGet = (url) => {
         return Promise.reject(err);
     })
 }
-
 export const httpPost = (options) => {
     return axios({
         method: 'post',

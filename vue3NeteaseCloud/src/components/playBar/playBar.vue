@@ -96,11 +96,11 @@
 </template>
 
 <script>
-    import { Icon, Slider,Popup, } from 'vant';
+    import { Icon, Slider, Popup, } from 'vant';
     import { ref, reactive, watch, computed, nextTick, toRefs, } from 'vue';
     import { useStore } from 'vuex';
-    import { getLrc, getSongUrl } from '@/api/search.js';
-    import { loading, loaded } from '@/tools/common.js';
+    import { getLrc, getSongUrl, } from '@/api/search.js';
+    import { loading, loaded, } from '@/tools/common.js';
 
     export default {
         name: 'PlayBar',
@@ -350,6 +350,11 @@
                 songIdx.value = computedSongIdx();
             })
 
+            let nums = computed(() => store.getters.getNumber);
+
+            watch(nums, (now) => {
+                showPlayWarp.value = false;
+            })
 
             return {
                 audio,

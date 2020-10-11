@@ -27,6 +27,7 @@
         setup() {
             const keepViews = ['Home', 'Sort'];
             login();
+            
             return {
                 keepViews
             }

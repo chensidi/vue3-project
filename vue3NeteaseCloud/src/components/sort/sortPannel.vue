@@ -2,7 +2,7 @@
     <div class="sort-list">
         <div class="sort-items" v-for="(item) of list" :key="item.id">
             <div class="sort-item">
-                <img class="sort-logo" :src="item.coverImgUrl" alt="">
+                <img class="sort-logo" src="http://p3.music.126.net/VnZiScyynLG7atLIZ2YPkw==/18686200114669622.jpg" :data-src="item.coverImgUrl" alt="">
                 <p class="updata-time">{{item.updateFrequency}}</p>
             </div>
             <p class="sortname">{{item.name}}</p>

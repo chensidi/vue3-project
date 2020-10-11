@@ -37,3 +37,19 @@ export const albumAndSinger = (al, ar) => { // 张学友 / 汤宝如 - 相思风
     })
     return arArr.join(' / ') + ' - ' + al.name;
 }
+
+export const lazyLoadImg = (target, options) => { //图片懒加载
+    let io = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting) {
+                let src = entry.target.getAttribute('data-src');
+                if(src) {
+                    entry.target.setAttribute('src', src);
+                    entry.target.removeAttribute('data-src');
+                    observer.disconnect();
+                }
+            }
+        })
+    }, options)
+    io.observe(target);
+}

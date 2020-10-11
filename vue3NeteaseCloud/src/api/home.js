@@ -4,7 +4,7 @@ export const getRecommend = async (num=6) => { //获取推荐歌单
     let res = await httpGet(`/personalized?limit=${num}`).catch(err => {
         return Promise.reject(err);
     })
-    if(res.status === 200){
+    if(res.status === 200){ 
         return res.data.result;
     }else{
         return Promise.reject(res.status);

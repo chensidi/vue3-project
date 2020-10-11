@@ -21,11 +21,11 @@
 
 <script>
     import { getTopList } from '@/api/sort.js';
-    import { ref, reactive, toRefs, onActivated } from 'vue';
+    import { ref, reactive, toRefs, onActivated, nextTick, } from 'vue';
     import { onBeforeRouteLeave } from 'vue-router';
     import SortPannel from '@/components/sort/sortPannel.vue';
     import TrackPannel from '@/components/sort/trackPannel.vue';
-    import { loading, loaded } from '@/tools/common.js';
+    import { loading, loaded, lazyLoadImg, } from '@/tools/common.js';
     export default {
         name: 'Sort',
         components: {
@@ -76,6 +76,17 @@
                 setTimeout(() => {
                     loaded();
                 }, 1000)
+                nextTick(() => {
+					let sorts = document.getElementsByClassName('sort-logo');
+					sorts = Array.from(sorts);
+					sorts.forEach(item => {
+						lazyLoadImg(item, {
+							root: document.getElementsByClassName('box-wrap')[0],
+							threshold: 0,
+							rootMargin: '0px 0px 0px 0px'
+						})
+					})
+				})
             }
 
             function trackFormat(trackObj) {

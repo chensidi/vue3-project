@@ -97,7 +97,7 @@
 
 <script>
     import { Icon, Slider, Popup, } from 'vant';
-    import { ref, reactive, watch, computed, nextTick, toRefs, } from 'vue';
+    import { ref, reactive, watch, computed, nextTick, toRefs, onMounted, } from 'vue';
     import { useStore } from 'vuex';
     import { getLrc, getSongUrl, } from '@/api/search.js';
     import { loading, loaded, } from '@/tools/common.js';
@@ -149,6 +149,7 @@
             
             function playAndPause() { //播放&暂停
                 let audioDom = audio.value;
+                console.log(audio);
                 if(audioDom.paused) {
                     audioDom.play();
                     playing.value = true;
@@ -342,6 +343,7 @@
                         timeStamp.start = 0;
                         timeStamp.end = audioDom.duration;
                         timeStamp.angle = 0;
+                        songIdx.value = computedSongIdx();
                     }, 0)
                 })
             })
@@ -354,6 +356,10 @@
 
             watch(nums, (now) => {
                 showPlayWarp.value = false;
+            })
+
+            onMounted(() => {
+                songIdx.value = computedSongIdx();
             })
 
             return {

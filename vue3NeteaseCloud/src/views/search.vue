@@ -220,7 +220,7 @@
                     }
                 }
                 if(!key) {
-                    tempHistory.push({
+                    tempHistory.unshift({
                         url: res.url,
                         singer: item.ar[0].name,
                         song: item.name,

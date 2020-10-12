@@ -149,7 +149,7 @@
             
             function playAndPause() { //播放&暂停
                 let audioDom = audio.value;
-                console.log(audio);
+                // console.log(audio);
                 if(audioDom.paused) {
                     audioDom.play();
                     playing.value = true;

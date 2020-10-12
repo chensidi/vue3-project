@@ -25,7 +25,7 @@
             PlayBar
         },
         setup() {
-            const keepViews = ['Home', 'Sort'];
+            const keepViews = ['Home', 'Sort', 'Singer'];
             login();
             
             return {

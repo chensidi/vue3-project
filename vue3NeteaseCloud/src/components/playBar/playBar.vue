@@ -87,7 +87,7 @@
                                 {{ item.singer }}
                             </em>
                         </span>
-                        <van-icon name="cross" />
+                        <van-icon name="cross" @click.stop="delSong(item, i, $event)" />
                     </p>
                 </div>
             </div>
@@ -264,38 +264,44 @@
                 }
             }
 
-            async function cutSong(flag=true) { //切歌
-                songIdx.value = computedSongIdx();
-                if(flag) { //下一首
-                    if(songIdx.value >= getAudioHistory.value.length - 1) { //已经是最后一首
-                        songIdx.value = 0; //归零
-                    }else {
-                        songIdx.value ++;
+            function cutSong(flag=true) { //切歌
+                return new Promise(async (resolve, reject) => {
+                    if(getAudioHistory.value.length <= 0) { //没有歌曲切换无效
+                        resolve(false);
+                        return;
                     }
-                }else { //上一首
-                    if(songIdx.value <= 0) { //已经是第一首
-                        songIdx.value = getAudioHistory.value.length - 1; //退到最后一首
-                    }else {
-                        songIdx.value --;
-                    } 
-                }
+                    songIdx.value = computedSongIdx();
+                    if(flag) { //下一首
+                        if(songIdx.value >= getAudioHistory.value.length - 1) { //已经是最后一首
+                            songIdx.value = 0; //归零
+                        }else {
+                            songIdx.value ++;
+                        }
+                    }else { //上一首
+                        if(songIdx.value <= 0) { //已经是第一首
+                            songIdx.value = getAudioHistory.value.length - 1; //退到最后一首
+                        }else {
+                            songIdx.value --;
+                        } 
+                    }
 
-                let item = getAudioHistory.value[songIdx.value]; //当前歌曲对象
-                loading('歌曲下载中...');
-                let res = await getSongUrl(item.id); //下载歌曲
-                store.dispatch('setAudioInfo', { //更新store
-                    url: res.url,
-                    singer: item.singer,
-                    song: item.song,
-                    poster: item.poster,
-                    id: item.id
-                }).then(async () => {
-                    setTimeout(() => {loaded()}, 500);
-                    res = await getLrc(getAudioInfo.value.id);
-                    lrc = res.lyric;
-                    lrcArr.value = formatLrc(lrc);
+                    let item = getAudioHistory.value[songIdx.value]; //当前歌曲对象
+                    loading('歌曲下载中...');
+                    let res = await getSongUrl(item.id); //下载歌曲
+                    store.dispatch('setAudioInfo', { //更新store
+                        url: res.url,
+                        singer: item.singer,
+                        song: item.song,
+                        poster: item.poster,
+                        id: item.id
+                    }).then(async () => {
+                        setTimeout(() => {loaded()}, 500);
+                        res = await getLrc(getAudioInfo.value.id);
+                        lrc = res.lyric;
+                        lrcArr.value = formatLrc(lrc);
+                        resolve(true);
+                    })
                 })
-                
             }
 
             async function toPlay(item) { //点击播放
@@ -319,6 +325,22 @@
             function onVoiceChange(val) {
                 let audioDom = audio.value;
                 audioDom.volume = (100 - val) / 100;
+            }
+
+            async function delSong(item, i) { //删除历史歌曲
+                let audioDom = audio.value;
+                let tempHistory = getAudioHistory.value;
+                if(songIdx.value == i) { //删除的就是当前的
+                    let k = audioDom.paused; 
+                    let res = await cutSong(true);
+                    if(k) { //没有播放
+                        audioDom.pause();
+                        playing.value = false;
+                    }
+                }
+                tempHistory.splice(i, 1);
+                store.dispatch('setAudioHistory', tempHistory);
+                songIdx.value = computedSongIdx();
             }
 
 
@@ -356,6 +378,7 @@
 
             watch(nums, (now) => {
                 showPlayWarp.value = false;
+                showPop.value = false;
             })
 
             onMounted(() => {
@@ -387,6 +410,7 @@
                 songIdx,
                 onVoiceChange,
                 voice,
+                delSong,
             }
         }
     }

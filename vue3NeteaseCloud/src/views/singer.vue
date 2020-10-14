@@ -15,13 +15,16 @@
 				finished-text="没有更多了"
 				@load="onLoad"
 			>
-				<p class="singer-item" v-for="(obj) of singerList" :key="obj.id">
+				<p @click.stop="to(obj)" class="singer-item" v-for="(obj) of singerList" :key="obj.id">
 					<img class="singer-head" :data-src="obj.picUrl" alt="" src="../assets/head.jpg">
 					<span class="van-ellipsis">{{ obj.name }} {{ obj.alias.length > 0?'(' + obj.alias[0] + ')':'' }}</span>
 				</p>
 			</van-list>
 		</div>
 	</div>
+	<transition name="slide">
+		<router-view></router-view>
+	</transition>
 </template>
 
 <script>
@@ -29,7 +32,7 @@
 	import { ref, reactive, toRefs, onMounted, watch, nextTick, onActivated, } from 'vue';
 	import { getSingerList } from '@/api/singer.js';
 	import { lazyLoadImg } from '@/tools/common.js';
-	import { onBeforeRouteLeave } from 'vue-router';
+	import { onBeforeRouteLeave, useRouter } from 'vue-router';
 	
 	export default {
 		name: 'Singer',
@@ -130,6 +133,11 @@
 				}
 			}
 
+			let router = useRouter();
+			function to(item) {
+				router.push({name: 'SingerDetails', query: {id: item.id}})
+			}
+
 			return {
 				singerList,
 				...toRefs(loadObj),
@@ -137,6 +145,7 @@
 				...toRefs(typeList),
 				...toRefs(typeObj),
 				onAreaChange,
+				to,
 			}
 		}
 	}
@@ -144,6 +153,12 @@
 
 <style lang="scss" scoped>
 	@import '@/assets/style.scss';
+	.slide-enter-active,.slide-leave-active{
+		transition: all 0.3s;
+	}
+	.slide-enter-from, .slide-leave-to{
+		transform: translateX(100%);
+	}
 	.singer-item{
 		@include flex(center, flex-start);
 		padding: 10px 10px;

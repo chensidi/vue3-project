@@ -19,7 +19,17 @@ const routes = [
         component: () => import(/* webpackChunkName: "about" */ '@/views/singer.vue'),
         meta: {
             title: '歌手列表'
-        }
+        },
+        children: [
+            {
+                path: 'singerDetails',
+                name: 'SingerDetails',
+                component: () => import('@/views/singerDetails.vue'),
+                meta: {
+                    title: '歌手详情'
+                }
+            }
+        ]
     },
 
     {

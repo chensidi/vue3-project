@@ -16,7 +16,7 @@ export const getSingerAlbum = async (id, limit=20, offset=0) => { //歌手专辑
         return Promise.reject(err);
     })
     if(res.status === 200){
-        return res.data.artist;
+        return res.data;
     }else{
         return Promise.reject(res.status);
     }

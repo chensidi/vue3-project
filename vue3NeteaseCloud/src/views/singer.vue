@@ -153,12 +153,7 @@
 
 <style lang="scss" scoped>
 	@import '@/assets/style.scss';
-	.slide-enter-active,.slide-leave-active{
-		transition: all 0.3s;
-	}
-	.slide-enter-from, .slide-leave-to{
-		transform: translateX(100%);
-	}
+	
 	.singer-item{
 		@include flex(center, flex-start);
 		padding: 10px 10px;

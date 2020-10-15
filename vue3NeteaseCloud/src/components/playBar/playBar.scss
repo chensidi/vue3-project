@@ -21,6 +21,7 @@
     height: 40px;
     border-radius: 50%;
     margin-right: 5px;
+    object-fit: cover;
 }
 .play-info{
     overflow: hidden;
@@ -117,6 +118,7 @@
         height: 100%;
         border-radius: 50%;
         transition: all .1s;
+        object-fit: cover;
     }
 }
 

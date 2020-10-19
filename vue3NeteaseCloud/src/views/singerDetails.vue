@@ -63,7 +63,7 @@
                     @load="onLoad1"
                 >
                     <div id="album-box">
-                        <div class="album-item" v-for="item in list1" :key="item.id">
+                        <div class="album-item" @click.stop="goAlbum(item)" v-for="item in list1" :key="item.id">
                             <div class="album-info">
                                 <img class="album-cover" src="../assets/cover.png" :data-src="item.picUrl" alt="">
                                 <div>
@@ -76,19 +76,49 @@
                     </div>
                 </van-list>
             </div>
-            <div v-show="tabOn==2">3</div>
+            <div v-show="tabOn==2">
+                <div class="mv-wrap">
+                    <div class="mv-item" v-for="(item) of mvList" :key="item.id">
+                        <div class="mv-box">
+                            <div class="mv-cover">
+                                <img :src="item.imgurl" alt="">
+                                <div class="mv-data">
+                                    <time>
+                                        {{ item.publishTime }}
+                                    </time>
+                                    <span>
+                                        <van-icon name="play-circle-o" /> {{ numFormat(item.playCount) }}
+                                    </span>
+                                </div>
+                            </div>
+                            <p class="van-ellipsis mui_list__tit">
+                                {{ item.name }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    <!-- <transition name="slide">
+		<router-view></router-view>
+	</transition> -->
+	<!-- <router-view v-slot="{ Component }">
+        <transition>
+            <component :is="Component" />
+        </transition>
+    </router-view> -->
+
 </template>
 
 <script>
     import { Icon, List, } from 'vant';
     import { ref, reactive, toRefs, onMounted, computed, nextTick, watch, } from 'vue';
-    import { useRouter } from 'vue-router';
-    import { getSingerAlbum, getSingerSong, } from '@/api/singer';
+    import { useRouter, onBeforeRouteLeave, } from 'vue-router';
+    import { getSingerAlbum, getSingerSong, getSingerMV, } from '@/api/singer';
     import { toPlay } from '@/tools/common.js';
     import { useStore } from 'vuex';
-    import { lazyLoadImg, timeFormat, } from '@/tools/common.js';
+    import { lazyLoadImg, timeFormat, numFormat, } from '@/tools/common.js';
     export default {
         name: 'SingerDetails',
         components: {
@@ -117,6 +147,7 @@
             const router = useRouter();
             let id = router.currentRoute.value.query.id;
             let getAudioHistory = computed(() => store.getters.getAudioHistory); //播放记录
+            const mvList = ref([]);
 
             function onLoad() {
                 getSingerSongs();
@@ -146,9 +177,10 @@
             }
 
             onMounted(() => {
-                window.onscroll = function(){
-                    fixedTop();
-                }
+                // window.onscroll = function(){
+                //     fixedTop();
+                // }
+                window.addEventListener('scroll', fixedTop);
             })
 
             async function getAlbums() { //获取专辑
@@ -193,8 +225,19 @@
             }
 
             getAlbums();
+            getSingerMVs();
             function toPlaySong(item){
                 toPlay(item, store, getAudioHistory);
+            }
+
+            function goAlbum(item) {
+                // console.log(item);
+                router.push({name: 'Album', params: {id: item.id}})
+            }
+
+            async function getSingerMVs() {
+                let res = await getSingerMV(id, 20, mvList.value.length);
+                mvList.value = res;
             }
 
             watch(tabOn, (now) => {
@@ -211,6 +254,17 @@
                 }
             })
             // getSingerSongs();
+            onBeforeRouteLeave((to, from ,next) => {
+                // console.log(to);
+                window.removeEventListener('scroll', fixedTop);
+                // let keepArr = store.getters.getKeep;
+                // keepArr.push('SingerDetails');
+                // keepArr = [...new Set(keepArr)]
+                // if(to.name == "Album") {
+                //     store.dispatch('setKeep', keepArr);
+                // }
+                next();
+            })
 
             return {
                 tabOn,
@@ -223,6 +277,9 @@
                 toPlaySong,
                 ...toRefs(albumObj),
                 timeFormat,
+                goAlbum,
+                mvList,
+                numFormat,
             }
         }
     }
@@ -428,6 +485,41 @@
         }
         .album-info{
             @include flex();
+        }
+    }
+    .mv-wrap{
+        padding: 10px 12px;
+        .mv-item{
+            width: 50%;
+            vertical-align: top;
+            display: inline-block;
+            margin-bottom: 14px;
+            font-size: 12px;
+            .mv-box{
+                margin: 0 4px;
+                font-size: 12px;
+            }
+            .mv-cover{
+                position: relative;
+                >img{
+                    width: 100%;
+                    object-fit: cover;
+                    border-radius: 8px;
+                }
+            }
+            .mv-data{
+                @include flex;
+                bottom: 5px;
+                position: absolute;
+                width: 100%;
+                color: #fff;
+                padding: 0 10px;
+            }
+            .mui_list__tit {
+                margin-top: 5px;
+                font-size: 14px;
+                color: #1a1a1a;
+            }
         }
     }
 </style>

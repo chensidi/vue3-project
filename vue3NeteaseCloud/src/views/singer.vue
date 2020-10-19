@@ -22,9 +22,15 @@
 			</van-list>
 		</div>
 	</div>
-	<transition name="slide">
+	<!-- <transition name="slide">
 		<router-view></router-view>
-	</transition>
+	</transition> -->
+	<!-- <router-view v-slot="{ Component }">
+		<transition>
+			<component :is="Component" />
+		</transition>
+	</router-view> -->
+	<router-view></router-view>
 </template>
 
 <script>

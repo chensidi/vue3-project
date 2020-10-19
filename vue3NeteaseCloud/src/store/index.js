@@ -6,7 +6,8 @@ export default Vuex.createStore({
         number: 0,
         audioInfo: {
         },
-        audioHistory: [] //播放历史记录
+        audioHistory: [], //播放历史记录
+        keep: ['Home', 'Sort', ''], //缓存页面
     },
     mutations: {
         setNumber(state, payload) {
@@ -19,6 +20,10 @@ export default Vuex.createStore({
         setAudioHistory(state, history) { //设置播放历史
             state.audioHistory = history;
             sessionStore.set('audioHistory', history);
+        },
+        setKeep(state, keepArr) { //设置路由缓存
+            state.keep = keepArr;
+            sessionStore.set('keepArr', keepArr);
         }
     },
     actions: {
@@ -30,6 +35,9 @@ export default Vuex.createStore({
         },
         setAudioHistory({commit}, history) {
             commit('setAudioHistory', history);
+        },
+        setKeep({commit}, keepArr) { //设置路由缓存
+            commit('setKeep', keepArr);
         }
     },
     getters: {
@@ -41,6 +49,9 @@ export default Vuex.createStore({
         },
         getAudioHistory(state) {
             return state.audioHistory.length ? state.audioHistory : sessionStore.get('audioHistory');
+        },
+        getKeep(state) {
+            return state.keep ? state.keep : sessionStore.get('keepArr');
         }
     },
     modules: {

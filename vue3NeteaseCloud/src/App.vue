@@ -3,7 +3,7 @@
         <Header />
         <SwitchPannel />
         <router-view v-slot="{ Component }">
-            <keep-alive :include="keepViews">
+            <keep-alive :include="getKeep">
                 <component :is="Component" />
             </keep-alive>
         </router-view>
@@ -16,6 +16,8 @@
     import SwitchPannel from '@/components/switchPannel/switchPannel.vue'
     import PlayBar from '@/components/playBar/playBar.vue'
     import { login } from '@/api/home.js';
+    import { useStore } from 'vuex';
+    import { computed, watch } from 'vue';
 
     export default {
         name: 'App',
@@ -25,11 +27,17 @@
             PlayBar
         },
         setup() {
+            const store = useStore();
             const keepViews = ['Home', 'Sort', ];
             login();
+            let kp = computed(() => store.getters.getKeep);
+            watch(kp, (now) => {
+                console.log(now);
+            })
             
             return {
-                keepViews
+                keepViews,
+                getKeep: computed(() => store.getters.getKeep)
             }
         }
     }

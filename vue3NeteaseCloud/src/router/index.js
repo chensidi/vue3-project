@@ -48,6 +48,15 @@ const routes = [
         meta: {
             title: '搜索'
         }
+    },
+
+    {
+        path: '/album/:id',
+        name: 'Album',
+        component: () => import('@/views/album.vue'),
+        meta: {
+            title: '专辑'
+        }
     }
 ]
 

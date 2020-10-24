@@ -78,7 +78,7 @@
             </div>
             <div v-show="tabOn==2">
                 <div class="mv-wrap">
-                    <div class="mv-item" v-for="(item) of mvList" :key="item.id">
+                    <div class="mv-item" @click.stop="showMv(item)" v-for="(item) of mvList" :key="item.id">
                         <div class="mv-box">
                             <div class="mv-cover">
                                 <img :src="item.imgurl" alt="">
@@ -99,6 +99,16 @@
                 </div>
             </div>
         </div>
+        
+        <van-overlay 
+            :show="showMVPlay.show" 
+            @click="showMVPlay.show = false"
+            z-index='999'
+        >
+            <div class="video-box">
+                <video ref="video" preload="" controls :src="showMVPlay.url" :poster="showMVPlay.cover"></video>
+            </div>
+        </van-overlay>
     </div>
     <!-- <transition name="slide">
 		<router-view></router-view>
@@ -112,18 +122,19 @@
 </template>
 
 <script>
-    import { Icon, List, } from 'vant';
-    import { ref, reactive, toRefs, onMounted, computed, nextTick, watch, } from 'vue';
+    import { Icon, List, Dialog, Overlay, } from 'vant';
+    import { ref, reactive, toRefs, onMounted, computed, nextTick, watch, toRef } from 'vue';
     import { useRouter, onBeforeRouteLeave, } from 'vue-router';
-    import { getSingerAlbum, getSingerSong, getSingerMV, } from '@/api/singer';
-    import { toPlay } from '@/tools/common.js';
+    import { getSingerAlbum, getSingerSong, getSingerMV, getMVUrl, } from '@/api/singer';
     import { useStore } from 'vuex';
-    import { lazyLoadImg, timeFormat, numFormat, } from '@/tools/common.js';
+    import { toPlay, lazyLoadImg, timeFormat, numFormat, loading, loaded, } from '@/tools/common.js';
     export default {
         name: 'SingerDetails',
         components: {
             'van-icon': Icon,
             'van-list': List,
+            'van-dialog': Dialog,
+            'van-overlay': Overlay
         },
         setup() {
             const store = useStore();
@@ -148,6 +159,14 @@
             let id = router.currentRoute.value.query.id;
             let getAudioHistory = computed(() => store.getters.getAudioHistory); //播放记录
             const mvList = ref([]);
+            const showMVPlay = reactive({
+                show: false,
+                url: '',
+                cover: ''
+            })
+            let showMvRef = toRef(showMVPlay, 'show');
+
+            const video = ref(null);
 
             function onLoad() {
                 getSingerSongs();
@@ -174,6 +193,18 @@
 
             function back() {
                 router.back();
+            }
+
+            async function showMv(item) {
+                // console.log(item);
+                loading();
+                let url = await getMVUrl(item.id);
+                showMVPlay.url = url;
+                showMVPlay.cover = item.imgurl;
+                setTimeout(() => {
+                    loaded();
+                    showMVPlay.show = true;
+                }, 500)
             }
 
             onMounted(() => {
@@ -253,6 +284,25 @@
                     })
                 }
             })
+
+            watch(showMvRef, (now) => {
+                let videoDom = document.querySelector('video');
+                nextTick(() => {
+                    if(!now) {
+                        video.value.pause();
+                    }else {
+                        try {
+                            video.value.play();
+                        }catch(e) {
+                            console.log(videoDom)
+                            videoDom.oncanplay = function() {
+                                console.log(666)
+                                video.value.play();
+                            }
+                        }
+                    }
+                })
+            })
             // getSingerSongs();
             onBeforeRouteLeave((to, from ,next) => {
                 // console.log(to);
@@ -280,6 +330,9 @@
                 goAlbum,
                 mvList,
                 numFormat,
+                showMv,
+                showMVPlay,
+                video,
             }
         }
     }
@@ -520,6 +573,16 @@
                 font-size: 14px;
                 color: #1a1a1a;
             }
+        }
+    }
+
+    .video-box{
+        position: absolute;
+        top: 50%;
+        width: 100%;
+        transform: translateY(-50%);
+        video{
+            width: 100%;
         }
     }
 </style>

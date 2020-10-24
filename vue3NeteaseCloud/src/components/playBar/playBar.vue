@@ -20,7 +20,7 @@
             @timeupdate="onTimeUpdate"
         >
         </audio>
-        <div :class="['play-pannel', {'show-pannel': showPlayWarp}]">
+        <div @touchmove="lock" :class="['play-pannel', {'show-pannel': showPlayWarp}]">
             <div class="play-bg" :style="{'background-image':'url('+ getAudioInfo.poster +')'}"></div>
             <div class="play-logo" @click.stop="showPlayWarp = false">
                 <van-icon name="arrow-left" />
@@ -343,6 +343,9 @@
                 songIdx.value = computedSongIdx();
             }
 
+            function lock(e) {
+                e.preventDefault();
+            }
 
             let getAudioInfo = computed(() => store.getters.getAudioInfo);
 
@@ -411,6 +414,7 @@
                 onVoiceChange,
                 voice,
                 delSong,
+                lock,
             }
         }
     }

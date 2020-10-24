@@ -69,28 +69,30 @@ export async function toPlay(item, store, getAudioHistory) { //点击播放
         setTimeout(() => { loaded() }, 500)
     })
 
-    let tempHistory;
-    if (getAudioHistory.value.length === undefined) { //没有记录
-        tempHistory = [];
-    } else {
-        tempHistory = getAudioHistory.value;
-    }
-    let key = false;
-    for (let i = 0; i < tempHistory.length; i++) {
-        if (tempHistory[i].id == item.id) { //之前就存在过
-            key = true;
-            break;
+    if(getAudioHistory != null) {
+        let tempHistory;
+        if (getAudioHistory.value.length === undefined) { //没有记录
+            tempHistory = [];
+        } else {
+            tempHistory = getAudioHistory.value;
         }
-    }
-    if (!key) {
-        tempHistory.unshift({
-            url: res.url,
-            singer: item.ar[0].name,
-            song: item.name,
-            poster: item.al.picUrl,
-            id: item.id
-        })
-        store.dispatch('setAudioHistory', tempHistory); //更新播放记录
+        let key = false;
+        for (let i = 0; i < tempHistory.length; i++) {
+            if (tempHistory[i].id == item.id) { //之前就存在过
+                key = true;
+                break;
+            }
+        }
+        if (!key) {
+            tempHistory.unshift({
+                url: res.url,
+                singer: item.ar[0].name,
+                song: item.name,
+                poster: item.al.picUrl,
+                id: item.id
+            })
+            store.dispatch('setAudioHistory', tempHistory); //更新播放记录
+        }
     }
 }
 

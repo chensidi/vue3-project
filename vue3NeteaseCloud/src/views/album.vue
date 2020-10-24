@@ -32,10 +32,15 @@
             </div>
         </div>
         <div style="padding-bottom: 50px" v-show="tabOn == 0">
+            <div class="play-all" @click.stop="playAll">
+                <van-icon name="play-circle-o"/>
+                播放全部
+            </div>
             <play-item 
                 :song="item.name"
                 :info="albumAndSinger(item.al, item.ar)"
                 v-for="(item) of songs" :key="item.id"
+                @click.stop="toPlaySong(item)"
             />
         </div>
         <div class="album-intr" style="padding-bottom: 50px" v-show="tabOn == 1">
@@ -49,14 +54,18 @@
     import HeadNav from '@/components/header/headNav.vue';
     import PlayItem from '@/components/songItem.vue';
     import { useRouter } from 'vue-router';
-    import { ref, reactive, toRefs, } from 'vue';
+    import { ref, reactive, toRefs, computed, } from 'vue';
     import { getAlbum } from '@/api/album';
-    import { loading, loaded, albumAndSinger, timeFormat, } from '@/tools/common';
+    import { loading, loaded, albumAndSinger, timeFormat, toPlay, } from '@/tools/common';
+    import { useStore } from 'vuex';
+    import { Icon, } from 'vant';
+
     export default {
         name: 'Album',
         components: {
             'head-nav': HeadNav,
             'play-item': PlayItem,
+            'van-icon': Icon,
         },
         setup() {
             const router = useRouter();
@@ -66,6 +75,8 @@
                 album: {},
                 songs: []
             });
+            const store = useStore();
+            let getAudioHistory = computed(() => store.getters.getAudioHistory); //播放记录
 
             function back() {
                 router.back();
@@ -80,6 +91,47 @@
                 loaded();
             }
 
+            function toPlaySong(item) {
+                toPlay(item, store, getAudioHistory)
+            }
+
+            function playAll() { //播放全部
+                /**
+                 * 第一步，把全部专辑里的歌曲list取出来，去重后加入历史记录
+                 * 第二步，将专辑第一首切换为当前播放，并更新store
+                 * 第三部，重新计算激活下标值
+                 */
+                // console.log(albumObj.songs);
+                // console.log(getAudioHistory);
+                let historyArr = getAudioHistory.value, //历史数组
+                    songList = albumObj.songs, //专辑数组
+                    needAddArr = []; //需要往历史数组里添加的数组
+                
+                songList.map(item => {
+                    for(let i = 0; i < historyArr.length; i ++) {
+                        if(historyArr[i].id == item.id) { //有存在
+                            historyArr.splice(i, 1);
+                            i --;
+                            break;
+                        }
+                    }
+                    needAddArr.push({
+                        url: '',
+                        singer: item.ar[0].name,
+                        song: item.name,
+                        poster: item.al.picUrl,
+                        id: item.id
+                    });
+                })
+
+                let firstItem = songList[0];
+                historyArr.unshift(...needAddArr);
+                store.dispatch('setAudioHistory', historyArr)
+                .then(() => {
+                    toPlay(firstItem, store);
+                })
+            }
+
             getAlbumInfo();
             
             return {
@@ -88,6 +140,8 @@
                 ...toRefs(albumObj),
                 albumAndSinger,
                 timeFormat,
+                toPlaySong,
+                playAll,
             }
         }
     }
@@ -126,7 +180,8 @@
         h4{
             font-size: 18px;
             font-weight: 400;
-            line-height: 3;
+            line-height: 1.5;
+            margin: 10px 0;
         }
         img{
             width: 24px;
@@ -199,5 +254,14 @@
         color: #777;
         text-indent: 2em;
         line-height: 2;
+    }
+    .play-all{
+        @include flex(center, flex-start);
+        padding: 10px;
+        font-size: 15px;
+        /deep/ .van-icon{
+            font-size: 25px;
+            margin-right: 5px;
+        }
     }
 </style>

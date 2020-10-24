@@ -45,3 +45,14 @@ export const getSingerMV = async (id, limit=20, offset=0) => { //歌手全部歌
         return Promise.reject(res.status);
     }
 }
+
+export const getMVUrl = async (id, r) => { //歌曲mv地址
+    let res = await httpGet(`/mv/url?id=${id}`).catch(err => {
+        return Promise.reject(err);
+    })
+    if(res.status === 200){
+        return res.data.data.url;
+    }else{
+        return Promise.reject(res.status);
+    }
+}

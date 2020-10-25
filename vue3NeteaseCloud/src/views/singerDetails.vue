@@ -98,15 +98,28 @@
                     </div>
                 </div>
             </div>
+            <div v-show="tabOn == 3" class="desc-wrap">
+                <h4>{{ name }}简介</h4>
+                <p>
+                    {{ descOfSinger.briefDesc }}
+                </p>
+                <div v-if="descOfSinger.introduction">
+                    <template v-for="(item) of descOfSinger.introduction" :key="item.ti">
+                        <h4>{{ item.ti }}</h4>
+                        <p>{{ item.txt }}</p>
+                    </template>
+                </div>
+            </div>
         </div>
         
         <van-overlay 
             :show="showMVPlay.show" 
-            @click="showMVPlay.show = false"
+            @click.self="showMVPlay.show = false"
             z-index='999'
         >
-            <div class="video-box">
+            <div class="video-box" @click.stop>
                 <video ref="video" preload="" controls :src="showMVPlay.url" :poster="showMVPlay.cover"></video>
+                <span class="br-tilte">分辨率：</span> <van-button type="primary" @click.stop="changeBrs(br)" v-for="br of showMVPlay.brs" :key="br">{{ br + 'P' }}</van-button>
             </div>
         </van-overlay>
     </div>
@@ -122,10 +135,17 @@
 </template>
 
 <script>
-    import { Icon, List, Dialog, Overlay, } from 'vant';
+    import { Icon, List, Dialog, Overlay, Button, } from 'vant';
     import { ref, reactive, toRefs, onMounted, computed, nextTick, watch, toRef } from 'vue';
     import { useRouter, onBeforeRouteLeave, } from 'vue-router';
-    import { getSingerAlbum, getSingerSong, getSingerMV, getMVUrl, } from '@/api/singer';
+    import { 
+        getSingerAlbum, 
+        getSingerSong, 
+        getSingerMV, 
+        getMVUrl, 
+        getSingerDesc,
+        getMVDetails,
+    } from '@/api/singer';
     import { useStore } from 'vuex';
     import { toPlay, lazyLoadImg, timeFormat, numFormat, loading, loaded, } from '@/tools/common.js';
     export default {
@@ -134,7 +154,8 @@
             'van-icon': Icon,
             'van-list': List,
             'van-dialog': Dialog,
-            'van-overlay': Overlay
+            'van-overlay': Overlay,
+            'van-button': Button,
         },
         setup() {
             const store = useStore();
@@ -167,6 +188,7 @@
             let showMvRef = toRef(showMVPlay, 'show');
 
             const video = ref(null);
+            const descOfSinger = reactive({});
 
             function onLoad() {
                 getSingerSongs();
@@ -199,12 +221,27 @@
                 // console.log(item);
                 loading();
                 let url = await getMVUrl(item.id);
+                await gotMVDetails(item.id);
                 showMVPlay.url = url;
                 showMVPlay.cover = item.imgurl;
                 setTimeout(() => {
                     loaded();
                     showMVPlay.show = true;
                 }, 500)
+            }
+
+            async function gotMVDetails(id) {
+                let res = await getMVDetails(id);
+                let brs = res.brs;
+                let brArr = [];
+                brs.map(item=>{
+                    brArr.push(item.br);
+                })
+                brArr.sort((a,b) => {
+                    return b - a;
+                })
+                showMVPlay.brs = brArr;
+                showMVPlay.id = res.id;
             }
 
             onMounted(() => {
@@ -257,6 +294,7 @@
 
             getAlbums();
             getSingerMVs();
+
             function toPlaySong(item){
                 toPlay(item, store, getAudioHistory);
             }
@@ -271,6 +309,19 @@
                 mvList.value = res;
             }
 
+            async function getSingerDescs() { //获取歌手简介
+                let res = await getSingerDesc(id);
+                Object.keys(res).map(key => {
+                    descOfSinger[key] = res[key];
+                })
+            }
+
+            async function changeBrs(br) { //分辨率切换
+                console.log(br);
+                let url = await getMVUrl(showMVPlay.id, br);
+                showMVPlay.url = url;
+            }
+
             watch(tabOn, (now) => {
                 if(now == 1) {
                     let albumCovers = document.getElementsByClassName('album-cover');
@@ -282,6 +333,11 @@
                             rootMargin: '0px 0px 0px 0px'
                         })
                     })
+                }
+                if(now == 3) {
+                    if(Object.keys(descOfSinger).length == 0) {
+                        getSingerDescs();
+                    }
                 }
             })
 
@@ -296,7 +352,6 @@
                         }catch(e) {
                             console.log(videoDom)
                             videoDom.oncanplay = function() {
-                                console.log(666)
                                 video.value.play();
                             }
                         }
@@ -333,6 +388,8 @@
                 showMv,
                 showMVPlay,
                 video,
+                descOfSinger,
+                changeBrs,
             }
         }
     }
@@ -578,11 +635,47 @@
 
     .video-box{
         position: absolute;
+        font-size: 0;
+        background: #fff;
         top: 50%;
         width: 100%;
         transform: translateY(-50%);
         video{
             width: 100%;
         }
+        .van-button--normal{
+            padding: 0 0.75rem;
+            margin: 5px;
+        }
+    }
+    .desc-wrap{
+        padding: 10px;
+        h4{
+            line-height: 2.5;
+            font-weight: normal;
+            position: relative;
+            padding: {
+                left: 10px;
+            }
+            &::before{
+                content: '';
+                width: 2px;
+                height: 1em;
+                background: #C20C0C;
+                position: absolute;
+                left: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                display: block;
+            }
+        }
+        p{
+            font-size: 14px;
+            color: #333;
+        }
+    }
+    .br-tilte{
+        font-size: 14px;
+        padding: 0 5px;
     }
 </style>

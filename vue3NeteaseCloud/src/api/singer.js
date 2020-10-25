@@ -46,12 +46,34 @@ export const getSingerMV = async (id, limit=20, offset=0) => { //歌手全部歌
     }
 }
 
-export const getMVUrl = async (id, r) => { //歌曲mv地址
-    let res = await httpGet(`/mv/url?id=${id}`).catch(err => {
+export const getMVUrl = async (id, r=1080) => { //mv地址
+    let res = await httpGet(`/mv/url?id=${id}&r=${r}`).catch(err => {
         return Promise.reject(err);
     })
     if(res.status === 200){
         return res.data.data.url;
+    }else{
+        return Promise.reject(res.status);
+    }
+}
+
+export const getMVDetails = async (id) => { //mv详情
+    let res = await httpGet(`/mv/detail?mvid=${id}`).catch(err => {
+        return Promise.reject(err);
+    })
+    if(res.status === 200){
+        return res.data.data;
+    }else{
+        return Promise.reject(res.status);
+    }
+}
+
+export const getSingerDesc = async (id) => { //歌手简介
+    let res = await httpGet(`/artist/desc?id=${id}`).catch(err => {
+        return Promise.reject(err);
+    })
+    if(res.status === 200){
+        return res.data;
     }else{
         return Promise.reject(res.status);
     }

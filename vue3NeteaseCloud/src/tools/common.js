@@ -96,6 +96,44 @@ export async function toPlay(item, store, getAudioHistory) { //点击播放
     }
 }
 
+
+export function playAll(his, targetGroup, store) { //播放全部
+    /**
+     * 第一步，把全部专辑里的歌曲list取出来，去重后加入历史记录
+     * 第二步，将专辑第一首切换为当前播放，并更新store
+     * 第三部，重新计算激活下标值
+     */
+    // console.log(albumObj.songs);
+    // console.log(getAudioHistory);
+    console.log(store)
+    let historyArr = his.value || [], //历史数组
+        songList = targetGroup, //专辑数组
+        needAddArr = []; //需要往历史数组里添加的数组
+    songList.map(item => {
+        for(let i = 0; i < historyArr.length; i ++) {
+            if(historyArr[i].id == item.id) { //有存在
+                historyArr.splice(i, 1);
+                i --;
+                break;
+            }
+        }
+        needAddArr.push({
+            url: '',
+            singer: item.ar[0].name,
+            song: item.name,
+            poster: item.al.picUrl,
+            id: item.id
+        });
+    })
+
+    let firstItem = songList[0];
+    historyArr.unshift(...needAddArr);
+    store.dispatch('setAudioHistory', historyArr)
+    .then(() => {
+        toPlay(firstItem, store);
+    })
+}
+
 export const timeFormat = (time) => {
     time = new Date(time);
     return time.getFullYear() + '-' + 

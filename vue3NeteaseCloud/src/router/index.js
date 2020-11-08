@@ -38,7 +38,17 @@ const routes = [
         component: () => import('@/views/sort.vue'),
         meta: {
             title: '排行榜'
-        }
+        },
+        children: [
+            {
+                path: 'details',
+                name: 'SortDetails',
+                component: () => import('@/views/sortDetails.vue'),
+                meta: {
+                    title: '排行榜详情'
+                }
+            }
+        ]
     },
 
     {

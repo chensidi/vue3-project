@@ -1,6 +1,6 @@
 <template>
     <div class="guanfang">
-        <div class="guanfang-item" v-for="(item) of list" :key="item.id">
+        <div class="guanfang-item" @click.stop="goDetails(item)" v-for="(item) of list" :key="item.id">
             <div class="sort-items">
                 <div class="sort-item">
                     <img class="sort-logo" src="../../assets/cover.png" :data-src="item.coverImgUrl" alt="">
@@ -15,6 +15,7 @@
 </template>
 
 <script>
+    import { useRouter } from 'vue-router';
     export default {
         props: {
             list: Array
@@ -24,9 +25,20 @@
             function trackFormat(trackObj) {
                 return `${trackObj.first} - ${trackObj.second}`
             }
+            const router = useRouter();
 
+            function goDetails(item) {
+                router.push({
+                    name: 'SortDetails',
+                    query: {
+                        id: item.id,
+                        name: item.name,
+                    }
+                })
+            }
             return {
-                trackFormat
+                trackFormat,
+                goDetails
             }
         }
     }

@@ -175,9 +175,13 @@
                     loading('歌词加载中...');
                     let res = await getLrc(getAudioInfo.value.id);
                     loaded();
-                    lrc = res.lyric;
-                    lrcArr.value = formatLrc(lrc);
-                    setTimeout(()=>{showPlayWarp.value = true;}, 500)
+                    if(res&&res.lyric) {
+                        lrc = res.lyric;
+                        lrcArr.value = formatLrc(lrc);
+                        setTimeout(()=>{showPlayWarp.value = true;}, 500)   
+                    }else {
+                        showPlayWarp.value = true;
+                    }
                 }else { //有歌词直接弹出
                     showPlayWarp.value = true;
                 }
@@ -297,8 +301,12 @@
                     }).then(async () => {
                         setTimeout(() => {loaded()}, 500);
                         res = await getLrc(getAudioInfo.value.id);
-                        lrc = res.lyric;
-                        lrcArr.value = formatLrc(lrc);
+                        if(res && res.lyric) {
+                            lrc = res.lyric;
+                            lrcArr.value = formatLrc(lrc);
+                        }else {
+                            lrcArr.value = [];
+                        }
                         resolve(true);
                     })
                 })

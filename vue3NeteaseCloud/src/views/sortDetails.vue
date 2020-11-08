@@ -1,93 +1,104 @@
 <template>
-    <div class="album">
-        <template v-if="album.name">
-            <head-nav 
-                :title="album.name"
-                :fun="back"
-            />
+    <div class="sort-details">
+        <head-nav 
+            :title="sortDetails.name"
+            :fun="back"
+        />
         <div class="album-cover-box">
             <div class="album-cover">
-                <img class="album-poster" :src="album.picUrl" alt="">
+                <img class="album-poster" :src="sortDetails.coverImgUrl" alt="">
                 <div class="simple-info">
-                    <h4>{{ album.name }}</h4>
+                    <h4>{{sortDetails.name}}</h4>
                     <p>
-                        <img :src="album.artist&&album.artist.picUrl" alt="">
-                        <span class="singer-name">{{ album.artist&&album.artist.name }}</span>
+                        <img :src="sortDetails.avatarUrl" alt="">
+                        <span class="singer-name">{{sortDetails.creator}}</span>
                     </p>
-                    <time>发行时间：{{timeFormat(album.publishTime)}}</time>
+                    <time>更新时间：{{timeFormat(sortDetails.updateTime)}}</time>
                 </div>
             </div>
-            <img class="album-box-bg" :src="album.blurPicUrl" alt="">
+            <img class="album-box-bg" :src="sortDetails.coverImgUrl" alt="">
         </div>
         <div id="navbar" class="navbar">
             <div class="mint-navbar">
                 <a :class="['mint-tab-item', {'is-selected': tabOn==0}]" @click.stop="tabOn = 0">
                     <div class="mint-tab-item-icon"></div> 
-                    <div class="mint-tab-item-label">专辑歌曲</div>
+                    <div class="mint-tab-item-label">歌曲</div>
                 </a>
                 <a :class="['mint-tab-item', {'is-selected': tabOn==1}]" @click.stop="tabOn = 1">
                     <div class="mint-tab-item-icon"></div> 
-                    <div class="mint-tab-item-label">专辑简介</div>
+                    <div class="mint-tab-item-label">简介</div>
                 </a>
             </div>
         </div>
         <div style="padding-bottom: 50px" v-show="tabOn == 0">
-            <div class="play-all" @click.stop="playAll">
+            <div class="play-all" @click.stop="playAll(getAudioHistory,sortDetails.songs, store)">
                 <van-icon name="play-circle-o"/>
                 播放全部
             </div>
             <play-item 
                 :song="item.name"
                 :info="albumAndSinger(item.al, item.ar)"
-                v-for="(item) of songs" :key="item.id"
+                v-for="(item) of sortDetails.songs" :key="item.id"
                 @click.stop="toPlaySong(item)"
             />
         </div>
         <div class="album-intr" style="padding-bottom: 50px" v-show="tabOn == 1">
-            {{ album.description }}
+            {{ sortDetails.description }}
         </div>
-        </template>
     </div>
 </template>
 
 <script>
+    import { 
+        useRoute, 
+        useRouter, 
+    } from 'vue-router';
+    import { 
+        ref, 
+        reactive,
+        computed,
+    } from 'vue';
+    import { useStore } from 'vuex';
     import HeadNav from '@/components/header/headNav.vue';
     import PlayItem from '@/components/songItem.vue';
-    import { useRouter } from 'vue-router';
-    import { ref, reactive, toRefs, computed, } from 'vue';
-    import { getAlbum } from '@/api/album';
-    import { loading, loaded, albumAndSinger, timeFormat, toPlay, } from '@/tools/common';
-    import { useStore } from 'vuex';
-    import { Icon, } from 'vant';
+    import { getTopDetails } from '@/api/sort.js';
+    import { loading, loaded, albumAndSinger, timeFormat, toPlay, playAll, } from '@/tools/common';
+    import { Icon } from 'vant';
 
     export default {
-        name: 'Album',
+        name: 'SortDetails',
         components: {
             'head-nav': HeadNav,
             'play-item': PlayItem,
             'van-icon': Icon,
         },
         setup() {
-            const router = useRouter();
-            const tabOn = ref(0);
-            let id = router.currentRoute.value.params.id;
-            const albumObj = reactive({
-                album: {},
-                songs: []
-            });
+            const route = useRoute(),
+                  router = useRouter();
             const store = useStore();
+
+            const sortDetails = reactive({
+                name: route.query.name
+            });
+
+            const tabOn = ref(0);
+
             let getAudioHistory = computed(() => store.getters.getAudioHistory); //播放记录
 
+            
             function back() {
                 router.back();
             }
 
-            async function getAlbumInfo() {
+            async function loadData() {
                 loading();
-                let res = await getAlbum(id);
-                // console.log(res);
-                albumObj.album = res.album;
-                albumObj.songs = res.songs;
+                let res = await getTopDetails(route.query.id);
+                sortDetails.coverImgUrl = res.playlist.coverImgUrl;
+                sortDetails.creator = res.playlist.creator.nickname;
+                sortDetails.avatarUrl = res.playlist.creator.avatarUrl;
+                sortDetails.updateTime = res.playlist.updateTime;
+                sortDetails.songs = res.playlist.tracks;
+                sortDetails.description = res.playlist.description;
                 loaded();
             }
 
@@ -95,53 +106,18 @@
                 toPlay(item, store, getAudioHistory)
             }
 
-            function playAll() { //播放全部
-                /**
-                 * 第一步，把全部专辑里的歌曲list取出来，去重后加入历史记录
-                 * 第二步，将专辑第一首切换为当前播放，并更新store
-                 * 第三部，重新计算激活下标值
-                 */
-                // console.log(albumObj.songs);
-                // console.log(getAudioHistory);
-                let historyArr = getAudioHistory.value, //历史数组
-                    songList = albumObj.songs, //专辑数组
-                    needAddArr = []; //需要往历史数组里添加的数组
-                
-                songList.map(item => {
-                    for(let i = 0; i < historyArr.length; i ++) {
-                        if(historyArr[i].id == item.id) { //有存在
-                            historyArr.splice(i, 1);
-                            i --;
-                            break;
-                        }
-                    }
-                    needAddArr.push({
-                        url: '',
-                        singer: item.ar[0].name,
-                        song: item.name,
-                        poster: item.al.picUrl,
-                        id: item.id
-                    });
-                })
+            loadData();
 
-                let firstItem = songList[0];
-                historyArr.unshift(...needAddArr);
-                store.dispatch('setAudioHistory', historyArr)
-                .then(() => {
-                    toPlay(firstItem, store);
-                })
-            }
-
-            getAlbumInfo();
-            
             return {
+                sortDetails,
                 back,
-                tabOn,
-                ...toRefs(albumObj),
-                albumAndSinger,
                 timeFormat,
-                toPlaySong,
+                tabOn,
+                albumAndSinger,
                 playAll,
+                toPlaySong,
+                getAudioHistory,
+                store,
             }
         }
     }
@@ -149,14 +125,15 @@
 
 <style lang="scss" scoped>
     @import '@/assets/style.scss';
-    
-    .album {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+    .sort-details{
+		position: fixed;
+		z-index: 10;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
         background-color: #fff;
+        overflow: auto;
     }
     .album-cover-box{
         overflow: hidden;
@@ -265,3 +242,4 @@
         }
     }
 </style>
+

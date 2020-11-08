@@ -1,5 +1,5 @@
 <template>
-    <div class="box-wrap">
+    <div class="box-wrap" v-show="!isLoad">
         <div class="sort-wrap">
             <h3 class="sort-title">榜单推荐</h3>
             <sort-pannel :list="recommendList" />
@@ -16,6 +16,14 @@
             <h3 class="sort-title">更多榜单</h3>
             <sort-pannel :list="moreList" />
         </div>
+        <!-- <transition name="slide">
+            <router-view></router-view>
+        </transition> -->
+        <router-view v-slot="{ Component }">
+            <transition name="slide">
+                <component :is="Component" />
+            </transition>
+        </router-view>
     </div>
 </template>
 
@@ -51,6 +59,8 @@
                 moreList: []
             })
 
+            const isLoad = ref(true);
+
             let top = 0;
 
             onActivated(() => {
@@ -64,6 +74,7 @@
             
             async function getTopLists() {
                 loading();
+                isLoad.value = true;
                 let res = await getTopList();
                 // console.log(res);
                 data.gfList= res.slice(0, 4);
@@ -75,6 +86,7 @@
                 data.moreList = res.slice(18, );
                 setTimeout(() => {
                     loaded();
+                    isLoad.value = false;
                 }, 1000)
                 nextTick(() => {
 					let sorts = document.getElementsByClassName('sort-logo');
@@ -97,7 +109,8 @@
 
             return {
                 ...toRefs(data),
-                trackFormat
+                trackFormat,
+                isLoad
             }
         }
     }

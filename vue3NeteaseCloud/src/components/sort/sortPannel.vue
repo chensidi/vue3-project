@@ -1,7 +1,7 @@
 <template>
     <div class="sort-list">
         <div class="sort-items" v-for="(item) of list" :key="item.id">
-            <div class="sort-item">
+            <div class="sort-item" @click.stop="goDetails(item)">
                 <img class="sort-logo" src="../../assets/cover.png" :data-src="item.coverImgUrl" alt="">
                 <p class="updata-time">{{item.updateFrequency}}</p>
             </div>
@@ -11,11 +11,29 @@
 </template>
 
 <script>
+    import { useRouter } from 'vue-router';
     export default {
         props: {
             list: Array
         },
-        name: 'SortPannel'
+        name: 'SortPannel',
+        setup() {
+            const router = useRouter();
+
+            function goDetails(item) {
+                router.push({
+                    name: 'SortDetails',
+                    query: {
+                        id: item.id,
+                        name: item.name,
+                    }
+                })
+            }
+
+            return {
+                goDetails
+            }
+        }
     }
 </script>
 

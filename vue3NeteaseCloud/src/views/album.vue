@@ -32,7 +32,7 @@
             </div>
         </div>
         <div style="padding-bottom: 50px" v-show="tabOn == 0">
-            <div class="play-all" @click.stop="playAll">
+            <div class="play-all" @click.stop="playAll(getAudioHistory, songs, store)">
                 <van-icon name="play-circle-o"/>
                 播放全部
             </div>
@@ -56,7 +56,13 @@
     import { useRouter } from 'vue-router';
     import { ref, reactive, toRefs, computed, } from 'vue';
     import { getAlbum } from '@/api/album';
-    import { loading, loaded, albumAndSinger, timeFormat, toPlay, } from '@/tools/common';
+    import { loading, 
+        loaded, 
+        albumAndSinger,
+        timeFormat, 
+        toPlay,
+        playAll, 
+    } from '@/tools/common';
     import { useStore } from 'vuex';
     import { Icon, } from 'vant';
 
@@ -95,42 +101,43 @@
                 toPlay(item, store, getAudioHistory)
             }
 
-            function playAll() { //播放全部
-                /**
-                 * 第一步，把全部专辑里的歌曲list取出来，去重后加入历史记录
-                 * 第二步，将专辑第一首切换为当前播放，并更新store
-                 * 第三部，重新计算激活下标值
-                 */
-                // console.log(albumObj.songs);
-                // console.log(getAudioHistory);
-                let historyArr = getAudioHistory.value, //历史数组
-                    songList = albumObj.songs, //专辑数组
-                    needAddArr = []; //需要往历史数组里添加的数组
+            
+            // function playAll() { //播放全部
+            //     /**
+            //      * 第一步，把全部专辑里的歌曲list取出来，去重后加入历史记录
+            //      * 第二步，将专辑第一首切换为当前播放，并更新store
+            //      * 第三部，重新计算激活下标值
+            //      */
+            //     // console.log(albumObj.songs);
+            //     // console.log(getAudioHistory);
+            //     let historyArr = getAudioHistory.value, //历史数组
+            //         songList = albumObj.songs, //专辑数组
+            //         needAddArr = []; //需要往历史数组里添加的数组
                 
-                songList.map(item => {
-                    for(let i = 0; i < historyArr.length; i ++) {
-                        if(historyArr[i].id == item.id) { //有存在
-                            historyArr.splice(i, 1);
-                            i --;
-                            break;
-                        }
-                    }
-                    needAddArr.push({
-                        url: '',
-                        singer: item.ar[0].name,
-                        song: item.name,
-                        poster: item.al.picUrl,
-                        id: item.id
-                    });
-                })
+            //     songList.map(item => {
+            //         for(let i = 0; i < historyArr.length; i ++) {
+            //             if(historyArr[i].id == item.id) { //有存在
+            //                 historyArr.splice(i, 1);
+            //                 i --;
+            //                 break;
+            //             }
+            //         }
+            //         needAddArr.push({
+            //             url: '',
+            //             singer: item.ar[0].name,
+            //             song: item.name,
+            //             poster: item.al.picUrl,
+            //             id: item.id
+            //         });
+            //     })
 
-                let firstItem = songList[0];
-                historyArr.unshift(...needAddArr);
-                store.dispatch('setAudioHistory', historyArr)
-                .then(() => {
-                    toPlay(firstItem, store);
-                })
-            }
+            //     let firstItem = songList[0];
+            //     historyArr.unshift(...needAddArr);
+            //     store.dispatch('setAudioHistory', historyArr)
+            //     .then(() => {
+            //         toPlay(firstItem, store);
+            //     })
+            // }
 
             getAlbumInfo();
             
@@ -142,6 +149,8 @@
                 timeFormat,
                 toPlaySong,
                 playAll,
+                store,
+                getAudioHistory,
             }
         }
     }

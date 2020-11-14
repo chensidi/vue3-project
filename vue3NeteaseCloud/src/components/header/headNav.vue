@@ -79,6 +79,10 @@
             font-weight: 400;
             color: #fff;
             text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 0 50px;
         }
     }
 </style>

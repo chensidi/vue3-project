@@ -1,5 +1,5 @@
 <template>
-    <div class="sort-details">
+   <div class="sort-details">
         <head-nav 
             :title="sortDetails.name"
             :fun="back"
@@ -64,15 +64,14 @@
     import { getTopDetails } from '@/api/sort.js';
     import { loading, loaded, albumAndSinger, timeFormat, toPlay, playAll, } from '@/tools/common';
     import { Icon } from 'vant';
-
     export default {
-        name: 'SortDetails',
+        name: 'PlayList',
         components: {
             'head-nav': HeadNav,
             'play-item': PlayItem,
             'van-icon': Icon,
         },
-        setup() {
+         setup() {
             const route = useRoute(),
                   router = useRouter();
             const store = useStore();
@@ -92,7 +91,7 @@
 
             async function loadData() {
                 loading();
-                let res = await getTopDetails(route.query.id);
+                let res = await getTopDetails(route.params.id);
                 sortDetails.coverImgUrl = res.playlist.coverImgUrl;
                 sortDetails.creator = res.playlist.creator.nickname;
                 sortDetails.avatarUrl = res.playlist.creator.avatarUrl;
@@ -124,6 +123,4 @@
 </script>
 
 <style lang="scss" scoped>
-    @import '@/assets/style.scss';
 </style>
-

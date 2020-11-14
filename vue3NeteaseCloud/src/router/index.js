@@ -8,7 +8,17 @@ const routes = [
         component: Home,
         meta: {
             title: 'Jacky Music'
-        }
+        },
+        children: [
+            {
+                path: 'playList/:id',
+                name: 'PlayList',
+                component: () => import('@/views/playList.vue'),
+                meta: {
+                    title: '歌单'
+                }
+            }
+        ]
     },
     {
         path: '/singer',
@@ -67,7 +77,16 @@ const routes = [
         meta: {
             title: '专辑'
         }
-    }
+    },
+
+    {
+        path: '/playSquare',
+        name: 'PlaySquare',
+        component: () => import('@/views/playSquare.vue'),
+        meta: {
+            title: '歌单广场'
+        }
+    },
 ]
 
 const router = createRouter({

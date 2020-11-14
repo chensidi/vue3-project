@@ -1,7 +1,7 @@
 <template>
     <section class="mui_tit">
         <h2 class="mod-title">{{title}}</h2>
-        <a class="mod-more" href="javascript:;">更多
+        <a class="mod-more" href="javascript:;"  @click.stop="to">更多
             <van-icon name="arrow" />
         </a>
     </section>
@@ -9,17 +9,26 @@
 
 <script>
     import { Icon } from 'vant';
+    import { useRouter } from 'vue-router';
 
     export default {
         name: 'ModTitle',
         props: {
-            title: String
+            title: String,
+            item: Object
         },
         components: {
             'van-icon': Icon
         },
-        setup() {
-            
+        setup(props) {
+            const router = useRouter();
+            function to() {
+                let item = props.item;
+                router.push(item);
+            }
+            return {
+                to
+            }
         }
     }
 </script>

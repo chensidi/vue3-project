@@ -3,15 +3,20 @@
         <Banners />
         <main>
             <section class="mod">
-                <mod-title title="官方推荐" />
-                <mod-section :list="recommendList" />
+                <mod-title title="官方推荐" :item="{name: 'PlaySquare'}" />
+                <mod-section :list="recommendList" :func="goPlayList" />
                 <mod-title title="精选歌单" />
-                <mod-section :list="topPlayList" />
+                <mod-section :list="topPlayList" :func="goPlayList" />
                 <mod-title title="最新MV" />
                 <mod-mv :list="newMvList" />
             </section>
         </main>
         <Footer />
+        <router-view v-slot="{ Component }">
+            <transition name="slide">
+                <component :is="Component" />
+            </transition>
+        </router-view>
     </div>
 </template>
 
@@ -30,7 +35,7 @@
              onActivated
             } from 'vue';
 
-    import { onBeforeRouteLeave } from 'vue-router';
+    import { onBeforeRouteLeave, useRouter, } from 'vue-router';
     export default {
         name: "Home",
         components: {
@@ -46,6 +51,7 @@
             const topPlayList = ref([]);
             const newMvList = ref([]);
             let top = 0;
+            const router = useRouter();
 
             onActivated(() => {
                 document.getElementsByClassName('box-wrap')[0].scrollTo(0, top);
@@ -87,18 +93,28 @@
                 })
             }
 
+            function goPlayList(item) {
+                console.log(item); 
+                router.push({
+                    name: 'PlayList',
+                    params: {id: item.id},
+                    query: {name: item.name}
+                })
+            }
+
             loadData();
 
             return {
                 recommendList,
                 topPlayList,
                 newMvList,
-                formatWan
+                formatWan,
+                goPlayList,
             }
         }
     };
 </script>
 
 <style lang="scss" scoped>
-    
+    // @import '@/assets/style.scss';
 </style>

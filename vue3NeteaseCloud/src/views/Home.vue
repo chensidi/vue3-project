@@ -5,7 +5,7 @@
             <section class="mod">
                 <mod-title title="官方推荐" :item="{name: 'PlaySquare'}" />
                 <mod-section :list="recommendList" :func="goPlayList" />
-                <mod-title title="精选歌单" />
+                <mod-title title="精选歌单" :item="{name: 'HighqualitySquare'}" />
                 <mod-section :list="topPlayList" :func="goPlayList" />
                 <mod-title title="最新MV" />
                 <mod-mv :list="newMvList" />

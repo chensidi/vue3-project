@@ -87,6 +87,15 @@ const routes = [
             title: '歌单广场'
         }
     },
+
+    {
+        path: '/highqualitySquare',
+        name: 'HighqualitySquare',
+        component: () => import('@/views/highqualitySquare.vue'),
+        meta: {
+            title: '精选歌单广场'
+        }
+    },
 ]
 
 const router = createRouter({

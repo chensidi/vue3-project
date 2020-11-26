@@ -140,3 +140,13 @@ export const timeFormat = (time) => {
     (time.getMonth() + 1).toString().padStart(2, 0) + '-' +
     (time.getDate()).toString().padStart(2, 0)
 }
+
+export function timeStampFormat(timeStamp) { //320ms ==> 05:20
+    let min = parseInt(timeStamp / 60),
+        sec = timeStamp % 60;
+    
+    min = min.toString().padStart(2, '0');
+    sec = sec.toString().padStart(2, '0');
+
+    return min + ':' + sec;
+}

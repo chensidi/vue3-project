@@ -117,11 +117,20 @@
             @click.self="showMVPlay.show = false"
             z-index='999'
         >
-            <div class="video-box" @click.stop>
+            <!-- <div class="video-box" @click.stop>
                 <video ref="video" preload="" controls :src="showMVPlay.url" :poster="showMVPlay.cover"></video>
                 <span class="br-tilte">分辨率：</span> <van-button type="primary" @click.stop="changeBrs(br)" v-for="br of showMVPlay.brs" :key="br">{{ br + 'P' }}</van-button>
-            </div>
+            </div> -->
         </van-overlay>
+        <video-component 
+            v-model="showMVPlay.show" 
+            :videoInfo="{
+                src: showMVPlay.url,
+                poster: showMVPlay.cover,
+                qualitys: showMVPlay.brs,
+                id: showMVPlay.id
+            }"
+        />
     </div>
     <!-- <transition name="slide">
 		<router-view></router-view>
@@ -148,6 +157,7 @@
     } from '@/api/singer';
     import { useStore } from 'vuex';
     import { toPlay, lazyLoadImg, timeFormat, numFormat, loading, loaded, } from '@/tools/common.js';
+    import VideoComponent from '@/components/video/VideoComponent.vue';
     export default {
         name: 'SingerDetails',
         components: {
@@ -156,6 +166,7 @@
             'van-dialog': Dialog,
             'van-overlay': Overlay,
             'van-button': Button,
+            'video-component': VideoComponent
         },
         setup() {
             const store = useStore();
@@ -341,6 +352,7 @@
                 }
             })
 
+            /*
             watch(showMvRef, (now) => {
                 let videoDom = document.querySelector('video');
                 nextTick(() => {
@@ -358,6 +370,7 @@
                     }
                 })
             })
+            */
             // getSingerSongs();
             onBeforeRouteLeave((to, from ,next) => {
                 // console.log(to);
@@ -677,5 +690,8 @@
     .br-tilte{
         font-size: 14px;
         padding: 0 5px;
+    }
+    .album-cover{
+        padding: 0 !important;
     }
 </style>

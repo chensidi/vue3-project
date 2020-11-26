@@ -1,5 +1,5 @@
 <template>
-    <form action="/">
+    <form action="/" class="serach-from">
         <van-search 
             v-model="searchValue" 
             placeholder="请输入搜索关键词" 
@@ -68,3 +68,12 @@
         }
     }
 </script>
+
+<style lang="scss" scoped>
+    .serach-from{
+        position: sticky;
+        top: -1px;
+        background: #fff;
+        z-index: 1;
+    }
+</style>

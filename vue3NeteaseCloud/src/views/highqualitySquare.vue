@@ -9,7 +9,7 @@
         >
             <van-tab :title="tag&&tag.name" v-for="(tag, i) of getFirstTag" :key="i" :name="i">
                 <section class="item-wrap" v-if="cats[i]&&cats[i].sub.length">
-                    <div class="items" v-for="item of cats[i].sub" :key="item.id">
+                    <div class="items" @click.stop="goJump(item)" v-for="item of cats[i].sub" :key="item.id">
                         <div class="items-box">
                             <img :src="item.coverImgUrl" alt="">
                             <span class="play-num">
@@ -31,14 +31,20 @@
                 </div>
             </van-tab>
         </van-tabs>
+        <router-view v-slot="{ Component }">
+            <transition name="slide">
+                <component :is="Component" />
+            </transition>
+        </router-view>
     </div>
 </template>
 
 <script>
 import { Tab, Tabs, Icon, Loading, } from 'vant';
 import { computed, reactive, ref, watch } from 'vue';
-import { playListRequest, getCatlist, getQualityListByCat } from '@/api/playList.js';
+import { playListRequest } from '@/api/playList.js';
 import { numFormat } from '@/tools/common.js'
+import { useRouter } from 'vue-router';
 export default {
     name: 'HighqualitySquare',
     components: {
@@ -53,6 +59,7 @@ export default {
         const cats = ref([]); //所有标签
         const activeTag = ref(''); //激活tag
         let catObj = reactive({});
+        const router = useRouter();
 
         async function loadAllCat() {
             let res = await playListRequest.getCatlist();
@@ -125,6 +132,18 @@ export default {
             console.log(arr);
         })
 
+        function goJump(item) { //跳转
+            router.push({
+                name: 'HighqualitySquarePlayList',
+                params: {
+                    id: item.id
+                },
+                query: {
+                    name: item.name
+                }
+            })
+        }
+
         // loadTag();
         loadAllCat();
 
@@ -145,7 +164,8 @@ export default {
             getFirstTag,
             loadMore,
             numFormat,
-            convertTagsByCats
+            convertTagsByCats,
+            goJump
         }
     }
 }

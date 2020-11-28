@@ -352,6 +352,16 @@
                 }
             })
 
+            let MVShow = toRef(showMVPlay, 'show');
+
+            watch(MVShow, (now) => {
+                if(now) { //播放mv，将div层级提高
+                    document.querySelector('.singer').style.zIndex = 999;
+                } else {
+                    document.querySelector('.singer').style.zIndex = '';
+                }
+            })
+
             /*
             watch(showMvRef, (now) => {
                 let videoDom = document.querySelector('video');

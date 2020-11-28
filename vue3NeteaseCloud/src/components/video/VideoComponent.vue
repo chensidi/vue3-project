@@ -152,6 +152,11 @@ export default {
             })
         }
 
+        watch(show, (now) => {
+            console.log(now);
+            playPauseVideo();
+        })
+
         return {
             ...toRefs(videoObj),
             videoDOM,

@@ -94,7 +94,7 @@
             }
 
             function goPlayList(item) {
-                console.log(item); 
+                // console.log(item); 
                 router.push({
                     name: 'PlayList',
                     params: {id: item.id},

@@ -85,7 +85,17 @@ const routes = [
         component: () => import('@/views/playSquare.vue'),
         meta: {
             title: '歌单广场'
-        }
+        },
+        children: [
+            {
+                path: 'playList/:id',
+                name: 'PlaySquarePlayList',
+                component: () => import('@/views/playList.vue'),
+                meta: {
+                    title: '歌单'
+                }
+            }
+        ]
     },
 
     {
@@ -94,7 +104,17 @@ const routes = [
         component: () => import('@/views/highqualitySquare.vue'),
         meta: {
             title: '精选歌单广场'
-        }
+        },
+        children: [
+            {
+                path: 'playList/:id',
+                name: 'HighqualitySquarePlayList',
+                component: () => import('@/views/playList.vue'),
+                meta: {
+                    title: '歌单'
+                }
+            }
+        ]
     },
 ]
 

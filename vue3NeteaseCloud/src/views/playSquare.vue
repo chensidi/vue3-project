@@ -9,12 +9,12 @@
         >
             <van-tab :title="tag.name" v-for="(tag) of tags" :key="tag.id" :name="tag.id">
                 <section class="item-wrap" v-if="tag.sub.length">
-                    <div class="items" v-for="item of tag.sub" :key="item.id">
+                    <div class="items" @click.stop="goJump(item)" v-for="item of tag.sub" :key="item.id">
                         <div class="items-box">
                             <img :src="item.coverImgUrl" alt="">
                             <span class="play-num">
                                 <van-icon name="play" />
-                                54万
+                                {{ numFormat(item.playCount) }}
                             </span>
                         </div>
                         <p class="intr">{{ item.name }}</p>
@@ -31,6 +31,11 @@
                 </div>
             </van-tab>
         </van-tabs>
+        <router-view v-slot="{ Component }">
+            <transition name="slide">
+                <component :is="Component" />
+            </transition>
+        </router-view>
     </div>
 </template>
 
@@ -38,6 +43,9 @@
 import { Tab, Tabs, Icon, Loading, } from 'vant';
 import { computed, ref } from 'vue';
 import { playListRequest } from '@/api/playList.js';
+import { useRouter } from 'vue-router';
+import { numFormat } from '@/tools/common.js'
+
 export default {
     name: 'PlaySquare',
     components: {
@@ -51,6 +59,7 @@ export default {
         const tags = ref([]); //所有标签
         const activeTag = ref(''); //激活tag
         let lastTime = '';
+        const router = useRouter();
 
         const computedIdx = computed(() => {
             for(let i = 0; i < tags.value.length; i ++) {
@@ -89,6 +98,18 @@ export default {
             !tags.value[computedIdx.value].isLoad && getListByTag();
         }
 
+        function goJump(item) { //跳转
+            router.push({
+                name: 'PlaySquarePlayList',
+                params: {
+                    id: item.id
+                },
+                query: {
+                    name: item.name
+                }
+            })
+        }
+
         loadTag();
 
         return {
@@ -96,6 +117,8 @@ export default {
             tags,
             tabChange,
             getListByTag,
+            goJump,
+            numFormat,
         }
     }
 }

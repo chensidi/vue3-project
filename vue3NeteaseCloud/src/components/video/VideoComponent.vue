@@ -89,8 +89,8 @@ export default {
             videoObj.curTime = Math.round(videoDOM.value.currentTime);
         }
         
-        function playPauseVideo() {
-            if(videoDOM.value.paused) {
+        function playPauseVideo(flag = true) {
+            if(videoDOM.value.paused && flag) {
                 videoDOM.value.play();
                 videoObj.key = true;
             }else {
@@ -154,7 +154,7 @@ export default {
 
         watch(show, (now) => {
             console.log(now);
-            playPauseVideo();
+            playPauseVideo(now);
         })
 
         return {

@@ -11,7 +11,7 @@
                 <section class="item-wrap" v-if="tag.sub.length">
                     <div class="items" @click.stop="goJump(item)" v-for="item of tag.sub" :key="item.id">
                         <div class="items-box">
-                            <img :src="item.coverImgUrl" alt="">
+                            <img src="../assets/cover.png" :data-src="item.coverImgUrl" alt="">
                             <span class="play-num">
                                 <van-icon name="play" />
                                 {{ numFormat(item.playCount) }}
@@ -41,10 +41,10 @@
 
 <script>
 import { Tab, Tabs, Icon, Loading, } from 'vant';
-import { computed, ref } from 'vue';
+import { computed, ref, nextTick } from 'vue';
 import { playListRequest } from '@/api/playList.js';
 import { useRouter } from 'vue-router';
-import { numFormat } from '@/tools/common.js'
+import { numFormat, lazyLoadImg } from '@/tools/common.js'
 
 export default {
     name: 'PlaySquare',
@@ -90,6 +90,13 @@ export default {
                 lastTime = res.lasttime;
                 tags.value[computedIdx.value].sub = tags.value[computedIdx.value].sub.concat(res.playlists);
                 tags.value[computedIdx.value].isLoad = true;
+
+                nextTick(() => {
+                    let wrap = document.getElementsByClassName('van-tab__pane-wrapper')[computedIdx.value];
+                    let imgs = wrap.getElementsByTagName('img');
+                    imgs = Array.from(imgs).slice(-18);
+                    lazyLoadHandler(imgs, document.querySelector('.play-square'));
+                })
             }, 500)
         }
 
@@ -107,6 +114,16 @@ export default {
                 query: {
                     name: item.name
                 }
+            })
+        }
+
+        function lazyLoadHandler(imgs, wrap) { //懒加载函数
+            imgs.forEach(item => {
+                lazyLoadImg(item, {
+                    root: wrap,
+                    threshold: 0,
+                    rootMargin: '0px 0px 0px 0px'
+                })
             })
         }
 

@@ -11,7 +11,7 @@
                 <section class="item-wrap" v-if="cats[i]&&cats[i].sub.length">
                     <div class="items" @click.stop="goJump(item)" v-for="item of cats[i].sub" :key="item.id">
                         <div class="items-box">
-                            <img :src="item.coverImgUrl" alt="">
+                            <img src="../assets/cover.png" :data-src="item.coverImgUrl" alt="">
                             <span class="play-num">
                                 <van-icon name="play" />
                                 {{ numFormat(item.playCount) }}
@@ -41,9 +41,9 @@
 
 <script>
 import { Tab, Tabs, Icon, Loading, } from 'vant';
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch, nextTick } from 'vue';
 import { playListRequest } from '@/api/playList.js';
-import { numFormat } from '@/tools/common.js'
+import { numFormat, lazyLoadImg, } from '@/tools/common.js'
 import { useRouter } from 'vue-router';
 export default {
     name: 'HighqualitySquare',
@@ -81,6 +81,12 @@ export default {
                 let res = await playListRequest.getQualityListByCat(title, 18, len);
                 setTimeout(() => {
                     cats.value[name].sub = cats.value[name].sub.concat(res);
+                    nextTick(() => {
+                        let wrapper = document.getElementsByClassName('van-tab__pane-wrapper')[name];
+                        let imgs = wrapper.getElementsByTagName('img');
+                        imgs = Array.from(imgs).slice(-18);
+                        lazyLoadHandler(imgs, document.getElementsByClassName('play-square')[0]);
+                    })
                 }, 500);
             }
             // !tags.value[computedIdx.value].isLoad && getListByTag();
@@ -93,6 +99,23 @@ export default {
             let res = await playListRequest.getQualityListByCat(getFirstTag.value[idx].name, 18, len);
             cats.value[idx].sub = cats.value[idx].sub.concat(res);
             cats.value[idx].loading = false;
+
+            nextTick(() => {
+                let wrapper = document.getElementsByClassName('van-tab__pane-wrapper')[idx];
+                let imgs = wrapper.getElementsByTagName('img');
+                imgs = Array.from(imgs).slice(-18);
+                lazyLoadHandler(imgs, document.getElementsByClassName('play-square')[0]);
+            })
+        }
+
+        function lazyLoadHandler(imgs, wrap) { //懒加载函数
+            imgs.forEach(item => {
+                lazyLoadImg(item, {
+                    root: wrap,
+                    threshold: 0,
+                    rootMargin: '0px 0px 0px 0px'
+                })
+            })
         }
 
         const getFirstTag = computed(() => {

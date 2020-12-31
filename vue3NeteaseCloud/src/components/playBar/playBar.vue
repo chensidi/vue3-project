@@ -18,6 +18,7 @@
             :src="getAudioInfo.url"  
             @ended="onEnd"
             @timeupdate="onTimeUpdate"
+            @loadedmetadata="onMetaLoad"
         >
         </audio>
         <div @touchmove="lock" :class="['play-pannel', {'show-pannel': showPlayWarp}]">
@@ -233,7 +234,7 @@
                 let duration = Math.round(audioDom.duration); //时长
                 progress.value = Math.round(curTime / duration * 100); //当前进度
                 timeStamp.start = curTime;
-                timeStamp.end = duration;
+                // timeStamp.end = duration;
                 changeTopValue(timeStamp.start);
             }
 
@@ -355,6 +356,13 @@
                 e.preventDefault();
             }
 
+            function onMetaLoad() {
+                console.log('onMetaLoad');
+                let audioDom = audio.value;
+                let duration = audioDom.duration;
+                timeStamp.end = parseInt(duration);
+            }
+
             let getAudioInfo = computed(() => store.getters.getAudioInfo);
 
             let getAudioHistory = computed(() => store.getters.getAudioHistory);
@@ -374,7 +382,7 @@
 
                         //时长相关初始化
                         timeStamp.start = 0;
-                        timeStamp.end = audioDom.duration;
+                        // timeStamp.end = audioDom.duration;
                         timeStamp.angle = 0;
                         songIdx.value = computedSongIdx();
                     }, 0)
@@ -423,6 +431,7 @@
                 voice,
                 delSong,
                 lock,
+                onMetaLoad,
             }
         }
     }

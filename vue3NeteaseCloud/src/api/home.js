@@ -22,7 +22,7 @@ export const getTopPlay= async (num=6) => { //获取精选歌单
     }
 }
 
-export const getNewMv= async (num=14) => { //获取最新MV
+export const getNewMv = async (num=14) => { //获取最新MV
     let res = await httpGet(`/mv/first?limit=${num}`).catch(err => {
         return Promise.reject(err);
     })

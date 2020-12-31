@@ -1,7 +1,11 @@
 import { Toast } from 'vant';
 
 export const numFormat = (num, basicNum = 10000) => {
-    return (num / basicNum).toFixed(1) + '万'
+    if(num < 10000) {
+        return num;
+    }else {
+        return (num / basicNum).toFixed(1) + '万';
+    }
 }
 
 export const artistsFormat = (artists) => {

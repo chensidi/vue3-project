@@ -61,6 +61,7 @@
 .album-cover-box{
     overflow: hidden;
     position: relative;
+    z-index: 1;
 }
 .album-cover{
     padding: 64px 16px 20px;
@@ -73,6 +74,7 @@
     width: 125px;
     height: 125px;
     object-fit: cover;
+    background-size: cover;
 }
 .simple-info{
     margin-left: 10px;
@@ -107,6 +109,7 @@
     height: 100%;
     object-fit: cover;
     filter: blur(36px);
+    background-size: cover;
     transform: scale(1.1);
 }
 

@@ -1,6 +1,6 @@
 <template>
-  <section class="mod-item">
-    <ul class="mod-list horizontal tit_wrap">
+  <section  class="mod-item">
+    <ul class="mod-list tit_wrap">
       <li v-for="item of list" :key="item.id" @click.stop="to(item)">
         <div class="mod-img">
           <img :src="item.picUrl || item.coverImgUrl" alt="" />
@@ -17,6 +17,8 @@
 <script>
 import { Icon } from "vant";
 import { numFormat } from "@/tools/common.js";
+import { nextTick, onMounted, watch, ref } from 'vue';
+import * as mui from '@/assets/mui/js/mui.min.js';
 
 export default {
   name: "ModSection",
@@ -32,14 +34,35 @@ export default {
     function to(item) {
       props.func(item);
     }
+
+    const h = ref(0);
+    
+    // onMounted(() => {
+    //   mui('.mui-scroll-wrapper').scroll({
+    //     deceleration: 0.0005 //flick 减速系数，系数越大，滚动速度越慢，滚动距离越小，默认值0.0006
+    //   });
+    // })
+
+    // watch(props, (now) => {
+    //   nextTick(() => {
+    //     let list = document.querySelector('.mod-list li');
+    //     h.value = list.getBoundingClientRect().height
+    //   })
+    // })
+
     return {
       numFormat,
       to,
+      h,
     };
   },
 };
 </script>
 
+
+<style scoped>
+  /* @import '../../assets/mui/css/mui.min.css'; */
+</style>
 <style lang="scss" scoped>
 @mixin flex($x, $y) {
   display: flex;

@@ -19,6 +19,14 @@ router.afterEach((to, from) => {
     store.dispatch('setNumber', Math.random());
 })
 
-createApp(App).use(router).use(store).mount('#app')
+import lazyPlugin from 'vue3-lazy'
+
+createApp(App).
+    use(router)
+    .use(store)
+    .use(lazyPlugin, {
+        loading: '@/assets/cover.png',
+    })
+    .mount('#app')
 
 

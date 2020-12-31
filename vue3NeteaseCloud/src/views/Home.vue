@@ -7,7 +7,7 @@
                 <mod-section :list="recommendList" :func="goPlayList" />
                 <mod-title title="精选歌单" :item="{name: 'HighqualitySquare'}" />
                 <mod-section :list="topPlayList" :func="goPlayList" />
-                <mod-title title="最新MV" />
+                <mod-title title="最新MV" :item="{name: 'MvIndex'}" />
                 <mod-mv :list="newMvList" />
             </section>
         </main>
@@ -32,7 +32,9 @@
     import { ref, 
              reactive ,
              computed,
-             onActivated
+             onActivated,
+             onMounted,
+             nextTick
             } from 'vue';
 
     import { onBeforeRouteLeave, useRouter, } from 'vue-router';

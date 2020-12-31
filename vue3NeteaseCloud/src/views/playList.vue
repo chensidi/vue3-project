@@ -1,5 +1,5 @@
 <template>
-   <div class="sort-details">
+   <div class="sort-details" ref="box">
         <head-nav 
             :title="sortDetails.name"
             :fun="back"
@@ -18,7 +18,7 @@
             </div>
             <img class="album-box-bg" :src="sortDetails.coverImgUrl" alt="">
         </div>
-        <div id="navbar" class="navbar">
+        <div id="navbar" class="navbar" :class="{'fixed': fixedH}">
             <div class="mint-navbar">
                 <a :class="['mint-tab-item', {'is-selected': tabOn==0}]" @click.stop="tabOn = 0">
                     <div class="mint-tab-item-icon"></div> 
@@ -57,6 +57,7 @@
         ref, 
         reactive,
         computed,
+        onMounted,
     } from 'vue';
     import { useStore } from 'vuex';
     import HeadNav from '@/components/header/headNav.vue';
@@ -84,6 +85,8 @@
 
             let getAudioHistory = computed(() => store.getters.getAudioHistory); //播放记录
 
+            const box = ref('box');
+            const fixedH = ref(false);
             
             function back() {
                 router.back();
@@ -105,6 +108,23 @@
                 toPlay(item, store, getAudioHistory)
             }
 
+            function scrollHandler() {
+                let h = document.querySelector('#navbar').getBoundingClientRect().top,
+                    height = document.querySelector('.page-header').getBoundingClientRect().height;
+                box.value.addEventListener('scroll', (e) => {
+                    console.log(box.value.scrollTop, h)
+                    if(box.value.scrollTop >= h - height) {
+                        fixedH.value = true;
+                    }else {
+                        fixedH.value = false;
+                    }
+                })
+            }
+
+            onMounted(() => {
+                scrollHandler();
+            })
+
             loadData();
 
             return {
@@ -117,10 +137,19 @@
                 toPlaySong,
                 getAudioHistory,
                 store,
+                box,
+                fixedH
             }
         }
     }
 </script>
 
 <style lang="scss" scoped>
+    .fixed{
+        position: fixed;
+        width: 100%;
+        left: 0;
+        z-index: 1;
+        top: 44px;
+    }
 </style>

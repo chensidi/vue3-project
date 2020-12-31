@@ -7,6 +7,7 @@
             preload="auto"
             ref="videoDOM"
             @timeupdate="timeUpdate"
+            @loadedmetadata="onMetaLoad"
         >
         </video>
         <transition name="fade">
@@ -55,7 +56,7 @@ export default {
             id: '',
             src: 'http://vodkgeyttp8.vod.126.net/cloudmusic/ICEiMDFgICAxMCBgJWEwOA==/mv/382191/e36cbb4095bdb74bab9528fe833d9fde.mp4?wsSecret=65854f1bc833230edef89784ca0a7eac&wsTime=1605959182',
             poster: 'http://p1.music.126.net/H7_L1aRDFWit8VeMJ23hbQ==/7715273092234794.jpg',
-            duration: 0,
+            duration: NaN,
             curTime: 0,
             curPc: 0,
             key: false,
@@ -73,13 +74,14 @@ export default {
 
         const videoInfo = computed(() => props.videoInfo.src);
 
-        watch(videoInfo, (now) => {
+        watch(videoInfo, (now, old) => {
             videoObj.src = now;
             videoObj.poster = props.videoInfo.poster;
             videoObj.qualitys = props.videoInfo.qualitys;
             videoObj.id = props.videoInfo.id;
             curQuality.value = videoObj.qualitys[0];
-            videoObj.duration = 0;
+            videoDOM.value.load();
+            videoObj.duration = NaN;
             videoObj.curPc = 0;
             videoObj.curTime = 0;
         })
@@ -101,12 +103,12 @@ export default {
         }
 
         function timeUpdate() {
-            let duration = videoDOM.value.duration;
+            let duration = isNaN(videoObj.duration) ? videoDOM.value.duration : videoObj.duration;
             let curTime = videoDOM.value.currentTime;
             curTime = Math.round(curTime);
             let curPc = (videoDOM.value.currentTime / duration) * 100;
             curPc = parseInt(curPc);
-            videoObj.duration = Math.round(duration);
+            // videoObj.duration = Math.round(duration);
             videoObj.curTime = curTime;
             videoObj.curPc = curPc;
         }
@@ -131,15 +133,20 @@ export default {
         }
 
         async function changeBrs(br) { //分辨率切换
-
+            let duration = videoDOM.value.duration;
             loading();
             let url = await getMVUrl(videoObj.id, br);
             videoObj.src = url;
             let currentTime = videoDOM.value.currentTime;
             nextTick(() => {
+                videoDOM.value.load();
+                videoDOM.value.currentTime = currentTime;
+                console.log(videoDOM.value.duration)
+                videoObj.duration = parseInt(duration);
                 setTimeout(() => {
                     loaded();
-                    videoDOM.value.currentTime = currentTime;
+                    // videoDOM.value.currentTime = currentTime;
+                    
                     if(videoObj.key) {
                         videoDOM.value.play();
                         videoObj.key = true;
@@ -152,8 +159,14 @@ export default {
             })
         }
 
+        function onMetaLoad() {
+            console.log('666')
+            let duration = videoDOM.value.duration;
+            videoObj.duration = parseInt(duration);
+        }
+
         watch(show, (now) => {
-            console.log(now);
+            // console.log(now);
             playPauseVideo(now);
         })
 
@@ -169,6 +182,7 @@ export default {
             curQuality,
             hide,
             show,
+            onMetaLoad,
         }
     }
 }

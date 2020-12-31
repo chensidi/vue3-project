@@ -81,7 +81,7 @@
                     <div class="mv-item" @click.stop="showMv(item)" v-for="(item) of mvList" :key="item.id">
                         <div class="mv-box">
                             <div class="mv-cover">
-                                <img :src="item.imgurl" alt="">
+                                <img v-lazy="item.imgurl" alt="">
                                 <div class="mv-data">
                                     <time>
                                         {{ item.publishTime }}
@@ -95,6 +95,12 @@
                                 {{ item.name }}
                             </p>
                         </div>
+                    </div>
+                    <div>
+                        <p class="load-more" v-show="!isLoadMv" @click.stop="loadMoreMVs">加载更多</p>
+                        <p class="load-more">
+                            <van-loading size="24px" v-show="isLoadMv">加载中...</van-loading>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -144,7 +150,7 @@
 </template>
 
 <script>
-    import { Icon, List, Dialog, Overlay, Button, } from 'vant';
+    import { Icon, List, Dialog, Overlay, Button, Loading } from 'vant';
     import { ref, reactive, toRefs, onMounted, computed, nextTick, watch, toRef } from 'vue';
     import { useRouter, onBeforeRouteLeave, } from 'vue-router';
     import { 
@@ -166,6 +172,7 @@
             'van-dialog': Dialog,
             'van-overlay': Overlay,
             'van-button': Button,
+            'van-loading': Loading,
             'video-component': VideoComponent
         },
         setup() {
@@ -200,6 +207,7 @@
 
             const video = ref(null);
             const descOfSinger = reactive({});
+            const isLoadMv = ref(true);
 
             function onLoad() {
                 getSingerSongs();
@@ -316,8 +324,12 @@
             }
 
             async function getSingerMVs() {
+                isLoadMv.value = true;
                 let res = await getSingerMV(id, 20, mvList.value.length);
-                mvList.value = res;
+                setTimeout(() => {
+                    mvList.value = mvList.value.concat(res);
+                    isLoadMv.value = false;
+                }, 1000)
             }
 
             async function getSingerDescs() { //获取歌手简介
@@ -331,6 +343,10 @@
                 console.log(br);
                 let url = await getMVUrl(showMVPlay.id, br);
                 showMVPlay.url = url;
+            }
+
+            async function loadMoreMVs() {
+                await getSingerMVs();
             }
 
             watch(tabOn, (now) => {
@@ -413,6 +429,8 @@
                 video,
                 descOfSinger,
                 changeBrs,
+                loadMoreMVs,
+                isLoadMv
             }
         }
     }
@@ -703,5 +721,10 @@
     }
     .album-cover{
         padding: 0 !important;
+    }
+    .load-more{
+        text-align: center;
+        color: #969799;
+        font-size: 14px;
     }
 </style>

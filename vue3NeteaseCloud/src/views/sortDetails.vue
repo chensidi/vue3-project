@@ -6,7 +6,8 @@
         />
         <div class="album-cover-box">
             <div class="album-cover">
-                <img class="album-poster" :src="sortDetails.coverImgUrl" alt="">
+                <!-- <img class="album-poster" :src="sortDetails.coverImgUrl" alt=""> -->
+                <div class="album-poster" :style="{'background-image': 'url(' + sortDetails.coverImgUrl +')'}"></div>
                 <div class="simple-info">
                     <h4>{{sortDetails.name}}</h4>
                     <p>
@@ -16,7 +17,8 @@
                     <time>更新时间：{{timeFormat(sortDetails.updateTime)}}</time>
                 </div>
             </div>
-            <img class="album-box-bg" :src="sortDetails.coverImgUrl" alt="">
+            <!-- <img class="album-box-bg" :src="sortDetails.coverImgUrl" alt=""> -->
+            <div class="album-box-bg" :style="{'background-image': 'url(' + sortDetails.coverImgUrl +')'}"></div>
         </div>
         <div id="navbar" class="navbar">
             <div class="mint-navbar">

@@ -3,7 +3,7 @@
         <div class="bar-l">
             <img class="logo" src="https://y.qq.com/mediastyle/mod/mobile/img/logo.svg" alt="">
             <div>
-                <h4 class="title">QQ音乐</h4>
+                <h4 class="title">Jacky Music</h4>
                 <p class="header-tips">打开APP收藏下载</p>
             </div>
         </div>

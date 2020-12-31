@@ -116,6 +116,15 @@ const routes = [
             }
         ]
     },
+
+    {
+        path: '/MvIdex',
+        name: 'MvIndex',
+        component: () => import('@/views/MvIndex.vue'),
+        meta: {
+            title: 'MV广场'
+        }
+    }
 ]
 
 const router = createRouter({

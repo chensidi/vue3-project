@@ -33,6 +33,6 @@ export const getNewMv = async (num=14) => { //获取最新MV
     }
 }
 
-export const login = async (phone=13404031653, password='woshichensidi666') => { //登录
+export const login = async (phone='', password='') => { //登录
     let res = await httpGet(`/login/cellphone?phone=${phone}&password=${password}`);
 }
